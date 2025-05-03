@@ -515,15 +515,23 @@
 
   function prepararDatosPorVista(tipoVista) {
     const resultados = window.resultadosCalculados.diarios;
+    const montoInicial = parseFloat(document.getElementById('monto').value);
     datosActuales = [];
+    
+    // Agregar período 0 con el monto inicial
+    datosActuales.push({
+      periodo: 0,
+      valor: montoInicial,
+      etiqueta: `${getNombrePeriodo(tipoVista)} 0`
+    });
     
     switch(tipoVista) {
       case 'diario':
-        datosActuales = resultados.map(item => ({
+        datosActuales = datosActuales.concat(resultados.map(item => ({
           periodo: item.dia,
           valor: item.valor,
           etiqueta: `Día ${item.dia}`
-        }));
+        })));
         break;
         
       case 'semanal':
