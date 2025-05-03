@@ -386,23 +386,28 @@
     // Calcular el interés diario (tasa efectiva diaria)
     const tasaDiaria = Math.pow(1 + interesAnual / 100, 1 / DIAS_POR_ANO) - 1;
     
-    // Calcular el ingreso ajustado por día, basado en la frecuencia seleccionada
-    const ingresoDiario = calcularIngresoPorDia(ingresoPeriodico, frecuenciaIngreso);
+    // Determinar la frecuencia de aporte en días
+    const diasEntreAportes = obtenerDiasEntreAportes(frecuenciaIngreso);
     
     // Realizar cálculos para todos los días
     let resultadosDiarios = [];
     let monto = montoInicial;
+    let diasDesdeUltimoAporte = 0;
     
-    // Determinar la frecuencia de aporte en días
-    const diasEntreAportes = obtenerDiasEntreAportes(frecuenciaIngreso);
+    // Aplicar primer aporte inicial junto con el monto inicial si la frecuencia es diaria
+    if (frecuenciaIngreso === 'diario') {
+      monto += ingresoPeriodico;
+    }
     
     for (let dia = 1; dia <= totalDias; dia++) {
+      diasDesdeUltimoAporte++;
       
       // Añadir ingreso periódico si corresponde según la frecuencia
-      if (dia % diasEntreAportes === 0 || diasEntreAportes === 1) {
+      if (diasDesdeUltimoAporte >= diasEntreAportes) {
         monto += ingresoPeriodico;
+        diasDesdeUltimoAporte = 0;
       }
-
+      
       // Aplicar interés diario
       monto = monto * (1 + tasaDiaria);
       
