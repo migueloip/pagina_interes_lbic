@@ -1,13 +1,703 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/src/assets/Logo liceo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calculadora de Intereses L.B.I.C</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora L.B.I.C</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+      padding: 20px;
+      color: #333;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .logo {
+      height: 80px;
+      object-fit: contain;
+    }
+    .title-container {
+      text-align: center;
+      flex-grow: 1;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+    h2 {
+      color: #2c3e50;
+      font-weight: 500;
+      margin-top: 0;
+    }
+    form {
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      margin-bottom: 25px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    .input-group {
+      display: flex;
+      gap: 10px;
+    }
+    .input-group input {
+      flex: 2;
+    }
+    .input-group select {
+      flex: 1;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #28a745;
+      border: none;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .results-section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      margin-top: 25px;
+      background-image: linear-gradient(to bottom right, #f9f9f9, #ffffff);
+      border: 1px solid #e0e0e0;
+    }
+    .view-selector {
+      margin: 20px 0;
+      text-align: center;
+    }
+    .view-selector button {
+      width: auto;
+      margin: 0 5px;
+      padding: 8px 15px;
+      background-color: #f8f9fa;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+    .view-selector button.active {
+      background-color: #28a745;
+      color: white;
+      border-color: #28a745;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      background: white;
+    }
+    th, td {
+      padding: 12px 15px;
+      border: 1px solid #e0e0e0;
+      text-align: right;
+    }
+    th {
+      background-color: #f5f5f5;
+      font-weight: 600;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    .hidden {
+      display: none;
+    }
+    .chart-container {
+      position: relative;
+      height: 350px;
+      margin: 20px 0;
+    }
+    .tabs {
+      display: flex;
+      margin-top: 20px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      background-color: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      border-bottom: none;
+      margin-right: 5px;
+      border-radius: 5px 5px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .tab.active {
+      background-color: white;
+      border-bottom: 1px solid white;
+      margin-bottom: -1px;
+      font-weight: 500;
+    }
+    .tab-icon {
+      width: 18px;
+      height: 18px;
+    }
+    .tab-content {
+      display: none;
+      padding: 20px 0;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+    .pagination button {
+      width: auto;
+      padding: 8px 15px;
+      border-radius: 4px;
+      background-color: #f8f9fa;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .pagination button.active {
+      background-color: #28a745;
+      color: white;
+      border-color: #28a745;
+    }
+    .pagination-info {
+      margin: 0 15px;
+      font-size: 14px;
+    }
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      padding: 20px;
+      border-top: 1px solid #eee;
+    }
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+    .footer-logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+    }
+    .footer-logo {
+      height: 50px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <img src="Logo liceo.png" alt="Logo Liceo" class="logo">
+    <div class="title-container">
+      <h1>Calculadora L.B.I.C</h1>
+    </div>
+    <img src="logo_especialidad.png" alt="Logo Especialidad" class="logo">
+  </div>
+
+  <form id="calcForm">
+    <div class="form-group">
+      <label>Monto inicial (CLP):</label>
+      <input type="number" id="monto" required>
+    </div>
+
+    <div class="form-group">
+      <label>Ingreso periódico (CLP):</label>
+      <div class="input-group">
+        <input type="number" id="ingreso" step="any" required>
+        <select id="frecuenciaIngreso">
+          <option value="diario">Diario</option>
+          <option value="semanal">Semanal</option>
+          <option value="mensual" selected>Mensual</option>
+          <option value="anual">Anual</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Interés anual (%):</label>
+      <input type="number" id="interes" step="0.01" required>
+    </div>
+
+    <div class="form-group">
+      <label>Plazo de inversión:</label>
+      <div class="input-group">
+        <input type="number" id="plazo" required>
+        <select id="unidadPlazo">
+          <option value="dias">Días</option>
+          <option value="semanas">Semanas</option>
+          <option value="meses" selected>Meses</option>
+          <option value="anos">Años</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="submit">Calcular</button>
+  </form>
+
+  <div id="resultadoContainer" class="results-section hidden">
+    <h2>Resultados</h2>
+    
+    <div class="view-selector">
+      <button data-view="diario" class="active">Día a día</button>
+      <button data-view="semanal">Semana a semana</button>
+      <button data-view="mensual">Mes a mes</button>
+      <button data-view="anual">Año a año</button>
+    </div>
+    
+    <div class="tabs">
+      <div class="tab active" data-tab="grafico">
+        <span class="tab-icon">📈</span> Gráfico
+      </div>
+      <div class="tab" data-tab="tabla">
+        <span class="tab-icon">📊</span> Tabla
+      </div>
+    </div>
+    
+    <div id="grafico-tab" class="tab-content active">
+      <div class="chart-container">
+        <canvas id="resultadoGrafico"></canvas>
+      </div>
+    </div>
+    
+    <div id="tabla-tab" class="tab-content">
+      <table id="resultado">
+        <thead>
+          <tr>
+            <th>Período</th>
+            <th>Total acumulado (CLP)</th>
+          </tr>
+        </thead>
+        <tbody id="tablaBody">
+        </tbody>
+      </table>
+      <div class="pagination" id="paginacion">
+        <button id="btnAnterior" disabled>&laquo; Anterior</button>
+        <span class="pagination-info" id="infoPaginacion">Página 1 de 1</span>
+        <button id="btnSiguiente" disabled>Siguiente &raquo;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-content">
+    <div class="footer-logos">
+      <img src="Logo liceo.png" alt="Logo Liceo" class="footer-logo">
+      <img src="logo_especialidad.png" alt="Logo Especialidad" class="footer-logo">
+    </div>
+    <p>Calculadora de Interés Compuesto L.B.I.C © 2025 - Desarrollada por Miguel Angel 4°G Programacion</p>
+  </div>
+</footer>
+
+<script>
+  // Variables globales
+  let grafico = null;
+  let paginaActual = 1;
+  const elementosPorPagina = 100;
+  let totalPaginas = 1;
+  let datosActuales = [];
+  let tipoVistaActual = 'diario';
+  
+  // Constantes de conversión
+  const DIAS_POR_ANO = 365;
+  const DIAS_POR_MES = 30.4167; // Promedio de días por mes (365/12)
+  const DIAS_POR_SEMANA = 7;
+  
+  // Event listeners para los controles de paginación - Definidos primero
+  document.getElementById('btnAnterior').addEventListener('click', function() {
+    if (paginaActual > 1) {
+      paginaActual--;
+      mostrarPaginaActual();
+    }
+  });
+  
+  document.getElementById('btnSiguiente').addEventListener('click', function() {
+    if (paginaActual < totalPaginas) {
+      paginaActual++;
+      mostrarPaginaActual();
+    }
+  });
+  
+  document.getElementById('calcForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const montoInicial = parseFloat(document.getElementById('monto').value);
+    const ingresoPeriodico = parseFloat(document.getElementById('ingreso').value);
+    const interesAnual = parseFloat(document.getElementById('interes').value);
+    const plazo = parseFloat(document.getElementById('plazo').value);
+    const unidadPlazo = document.getElementById('unidadPlazo').value;
+    const frecuenciaIngreso = document.getElementById('frecuenciaIngreso').value;
+    
+    // Convertir el plazo a días
+    let totalDias = convertirADias(plazo, unidadPlazo);
+    
+    // Calcular el interés diario (tasa efectiva diaria)
+    const tasaDiaria = Math.pow(1 + interesAnual / 100, 1 / DIAS_POR_ANO) - 1;
+    
+    // Calcular el ingreso ajustado por día, basado en la frecuencia seleccionada
+    const ingresoDiario = calcularIngresoPorDia(ingresoPeriodico, frecuenciaIngreso);
+    
+    // Realizar cálculos para todos los días
+    let resultadosDiarios = [];
+    let monto = montoInicial;
+    
+    // Determinar la frecuencia de aporte en días
+    const diasEntreAportes = obtenerDiasEntreAportes(frecuenciaIngreso);
+    
+    for (let dia = 1; dia <= totalDias; dia++) {
+      // Aplicar interés diario
+      monto = monto * (1 + tasaDiaria);
+      
+      // Añadir ingreso periódico si corresponde según la frecuencia
+      if (dia % diasEntreAportes === 0 || diasEntreAportes === 1) {
+        monto += ingresoPeriodico;
+      }
+      
+      resultadosDiarios.push({
+        dia: dia,
+        valor: monto
+      });
+    }
+
+    // Guardar resultados para usarlos al cambiar vista
+    window.resultadosCalculados = {
+      diarios: resultadosDiarios,
+      totalDias: totalDias,
+      unidadPlazo: unidadPlazo,
+      frecuenciaIngreso: frecuenciaIngreso
+    };
+
+    // Mostrar vista diaria por defecto
+    mostrarResultados('diario');
+    document.getElementById('resultadoContainer').classList.remove('hidden');
+  });
+
+  function convertirADias(cantidad, unidad) {
+    switch (unidad) {
+      case 'dias': return cantidad;
+      case 'semanas': return cantidad * DIAS_POR_SEMANA;
+      case 'meses': return cantidad * DIAS_POR_MES;
+      case 'anos': return cantidad * DIAS_POR_ANO;
+      default: return cantidad;
+    }
+  }
+  
+  function obtenerDiasEntreAportes(frecuencia) {
+    switch (frecuencia) {
+      case 'diario': return 1;
+      case 'semanal': return DIAS_POR_SEMANA;
+      case 'mensual': return DIAS_POR_MES;
+      case 'anual': return DIAS_POR_ANO;
+      default: return 1;
+    }
+  }
+  
+  function calcularIngresoPorDia(ingreso, frecuencia) {
+    switch (frecuencia) {
+      case 'diario': return ingreso;
+      case 'semanal': return ingreso / DIAS_POR_SEMANA;
+      case 'mensual': return ingreso / DIAS_POR_MES;
+      case 'anual': return ingreso / DIAS_POR_ANO;
+      default: return ingreso;
+    }
+  }
+
+  // Agregar event listeners para los botones de vista
+  document.querySelectorAll('.view-selector button').forEach(button => {
+    button.addEventListener('click', function() {
+      // Actualizar clase activa
+      document.querySelectorAll('.view-selector button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      this.classList.add('active');
+      
+      // Mostrar resultados según la vista seleccionada
+      mostrarResultados(this.dataset.view);
+    });
+  });
+  
+  // Event listeners para las pestañas
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      // Actualizar clase activa en pestañas
+      document.querySelectorAll('.tab').forEach(t => {
+        t.classList.remove('active');
+      });
+      this.classList.add('active');
+      
+      // Mostrar contenido de pestaña
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(`${this.dataset.tab}-tab`).classList.add('active');
+    });
+  });
+
+  function mostrarResultados(tipoVista) {
+    if (!window.resultadosCalculados) return;
+    
+    tipoVistaActual = tipoVista;
+    paginaActual = 1; // Resetear a la primera página al cambiar de vista
+    
+    const resultados = window.resultadosCalculados.diarios;
+    const tableThead = document.querySelector('#resultado thead tr');
+    
+    // Actualizar encabezado según vista
+    tableThead.innerHTML = `<th>${getNombrePeriodo(tipoVista)}</th><th>Total acumulado (CLP)</th>`;
+    
+    // Preparar datos según la vista seleccionada
+    prepararDatosPorVista(tipoVista);
+    
+    // Actualizar gráfico con todos los datos
+    actualizarGrafico(tipoVista);
+    
+    // Mostrar la primera página
+    mostrarPaginaActual();
+  }
+
+  function prepararDatosPorVista(tipoVista) {
+    const resultados = window.resultadosCalculados.diarios;
+    datosActuales = [];
+    
+    switch(tipoVista) {
+      case 'diario':
+        datosActuales = resultados.map(item => ({
+          periodo: item.dia,
+          valor: item.valor,
+          etiqueta: `Día ${item.dia}`
+        }));
+        break;
+        
+      case 'semanal':
+        // Agrupar por semanas
+        for (let semana = 1; semana <= Math.ceil(resultados.length / DIAS_POR_SEMANA); semana++) {
+          const indiceDia = Math.min(semana * DIAS_POR_SEMANA - 1, resultados.length - 1);
+          datosActuales.push({
+            periodo: semana,
+            valor: resultados[indiceDia].valor,
+            etiqueta: `Semana ${semana}`
+          });
+        }
+        break;
+        
+      case 'mensual':
+        // Agrupar por meses
+        for (let mes = 1; mes <= Math.ceil(resultados.length / DIAS_POR_MES); mes++) {
+          const indiceDia = Math.min(Math.floor(mes * DIAS_POR_MES) - 1, resultados.length - 1);
+          datosActuales.push({
+            periodo: mes,
+            valor: resultados[indiceDia].valor,
+            etiqueta: `Mes ${mes}`
+          });
+        }
+        break;
+        
+      case 'anual':
+        // Agrupar por años
+        for (let año = 1; año <= Math.ceil(resultados.length / DIAS_POR_ANO); año++) {
+          const indiceDia = Math.min(Math.floor(año * DIAS_POR_ANO) - 1, resultados.length - 1);
+          datosActuales.push({
+            periodo: año,
+            valor: resultados[indiceDia].valor,
+            etiqueta: `Año ${año}`
+          });
+        }
+        break;
+    }
+    
+    // Calcular total de páginas
+    totalPaginas = Math.ceil(datosActuales.length / elementosPorPagina);
+  }
+
+  function mostrarPaginaActual() {
+    const tablaBody = document.getElementById('tablaBody');
+    tablaBody.innerHTML = "";
+    
+    // Calcular índices de inicio y fin para la página actual
+    const inicio = (paginaActual - 1) * elementosPorPagina;
+    const fin = Math.min(inicio + elementosPorPagina, datosActuales.length);
+    
+    // Mostrar elementos de la página actual
+    for (let i = inicio; i < fin; i++) {
+      const item = datosActuales[i];
+      tablaBody.innerHTML += `<tr><td>${item.periodo}</td><td>${formatoMoneda(item.valor)}</td></tr>`;
+    }
+    
+    // Actualizar información de paginación
+    actualizarControlPaginacion();
+  }
+
+  function actualizarControlPaginacion() {
+    const btnAnterior = document.getElementById('btnAnterior');
+    const btnSiguiente = document.getElementById('btnSiguiente');
+    const infoPaginacion = document.getElementById('infoPaginacion');
+    
+    // Actualizar texto informativo
+    infoPaginacion.textContent = `Página ${paginaActual} de ${totalPaginas}`;
+    
+    // Habilitar/deshabilitar botones según corresponda
+    btnAnterior.disabled = paginaActual <= 1;
+    btnSiguiente.disabled = paginaActual >= totalPaginas;
+    
+    // Mostrar u ocultar paginación según la cantidad de datos
+    document.getElementById('paginacion').style.display = 
+      totalPaginas > 1 ? 'flex' : 'none';
+  }
+
+  function actualizarGrafico(tipoVista) {
+    const ctx = document.getElementById('resultadoGrafico').getContext('2d');
+    
+    // Extraer etiquetas y valores para el gráfico
+    // Para gráficos, limitamos a 100 puntos para mejor rendimiento
+    const etiquetas = [];
+    const valores = [];
+    
+    // Tomar muestras de datos para no sobrecargar el gráfico
+    const paso = Math.max(1, Math.floor(datosActuales.length / 100));
+    
+    for (let i = 0; i < datosActuales.length; i += paso) {
+      etiquetas.push(datosActuales[i].etiqueta);
+      valores.push(datosActuales[i].valor);
+    }
+    
+    // Asegurar que el último valor esté incluido
+    if (datosActuales.length > 0 && (datosActuales.length - 1) % paso !== 0) {
+      const ultimo = datosActuales[datosActuales.length - 1];
+      etiquetas.push(ultimo.etiqueta);
+      valores.push(ultimo.valor);
+    }
+    
+    // Si ya existe un gráfico, destruirlo para crear uno nuevo
+    if (grafico) {
+      grafico.destroy();
+    }
+    
+    // Crear nuevo gráfico
+    grafico = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: etiquetas,
+        datasets: [{
+          label: `Total acumulado por ${getNombrePeriodo(tipoVista).toLowerCase()}`,
+          data: valores,
+          backgroundColor: 'rgba(40, 167, 69, 0.2)',
+          borderColor: 'rgba(40, 167, 69, 1)',
+          borderWidth: 2,
+          pointBackgroundColor: 'rgba(40, 167, 69, 1)',
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: false,
+            ticks: {
+              callback: function(value) {
+                return new Intl.NumberFormat('es-CL', {
+                  style: 'currency',
+                  currency: 'CLP',
+                  maximumFractionDigits: 0,
+                  notation: 'compact'
+                }).format(value);
+              }
+            }
+          },
+          x: {
+            ticks: {
+              maxTicksLimit: 20,
+              autoSkip: true
+            }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return new Intl.NumberFormat('es-CL', {
+                  style: 'currency',
+                  currency: 'CLP',
+                  maximumFractionDigits: 0
+                }).format(context.parsed.y);
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function getNombrePeriodo(tipoVista) {
+    switch(tipoVista) {
+      case 'diario': return 'Día';
+      case 'semanal': return 'Semana';
+      case 'mensual': return 'Mes';
+      case 'anual': return 'Año';
+      default: return 'Período';
+    }
+  }
+
+  function formatoMoneda(valor) {
+    return new Intl.NumberFormat('es-CL', { 
+      style: 'currency', 
+      currency: 'CLP',
+      maximumFractionDigits: 0
+    }).format(valor);
+  }
+</script>
+
+</body>
 </html>
