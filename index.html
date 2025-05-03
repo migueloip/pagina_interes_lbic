@@ -397,13 +397,14 @@
     const diasEntreAportes = obtenerDiasEntreAportes(frecuenciaIngreso);
     
     for (let dia = 1; dia <= totalDias; dia++) {
-      // Aplicar interés diario
-      monto = monto * (1 + tasaDiaria);
       
       // Añadir ingreso periódico si corresponde según la frecuencia
       if (dia % diasEntreAportes === 0 || diasEntreAportes === 1) {
         monto += ingresoPeriodico;
       }
+
+      // Aplicar interés diario
+      monto = monto * (1 + tasaDiaria);
       
       resultadosDiarios.push({
         dia: dia,
