@@ -127,6 +127,258 @@
       margin: 2px 0 0;
       color: #465563;
     }
+    .version-design {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #dce6f0;
+    }
+    .version-design-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 15px;
+      margin-bottom: 10px;
+    }
+    .version-design-heading h3 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 18px;
+    }
+    .version-design-heading span {
+      color: #667788;
+      font-size: 13px;
+    }
+    .preview-browser {
+      overflow: hidden;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 8px 20px rgba(31, 41, 55, 0.12);
+    }
+    .preview-browser-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 28px;
+      padding: 0 10px;
+      background: #e9eef3;
+      border-bottom: 1px solid #cbd5e1;
+    }
+    .preview-browser-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #f87171;
+    }
+    .preview-browser-dot:nth-child(2) {
+      background: #fbbf24;
+    }
+    .preview-browser-dot:nth-child(3) {
+      background: #34d399;
+    }
+    .preview-browser-address {
+      flex: 1;
+      margin-left: 6px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: white;
+      color: #64748b;
+      font-size: 10px;
+      text-align: center;
+    }
+    .preview-canvas {
+      padding: 18px;
+      color: #334155;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    .preview-logo {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+    }
+    .preview-title {
+      margin: 0;
+      font-size: 18px;
+      text-align: center;
+    }
+    .preview-subtitle {
+      max-width: 520px;
+      margin: 5px auto 14px;
+      color: #64748b;
+      text-align: center;
+    }
+    .preview-header-v1 {
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: center;
+    }
+    .preview-header-v1 .preview-logos {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 6px;
+    }
+    .preview-header-v1 .preview-title {
+      background: linear-gradient(to right, #3b82f6, #8b5cf6);
+      background-clip: text;
+      color: transparent;
+    }
+    .preview-v1 {
+      background: #f1f5f9;
+    }
+    .preview-v1-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .preview-static {
+      background: #f8f9fa;
+    }
+    .preview-header-static {
+      display: grid;
+      grid-template-columns: 42px 1fr 42px;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .preview-header-static .preview-title {
+      color: #2c3e50;
+      font-weight: 600;
+    }
+    .preview-card {
+      padding: 14px;
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.09);
+    }
+    .preview-card-title {
+      margin: 0 0 10px;
+      padding-bottom: 6px;
+      color: #1d4ed8;
+      border-bottom: 2px solid #3b82f6;
+      font-size: 13px;
+    }
+    .preview-static .preview-card {
+      margin-top: 14px;
+    }
+    .preview-static .preview-card-title {
+      color: #2c3e50;
+      border-bottom: 0;
+    }
+    .preview-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .preview-field-label {
+      display: block;
+      margin-bottom: 3px;
+      color: #475569;
+      font-weight: 600;
+    }
+    .preview-fake-input {
+      min-height: 25px;
+      padding: 5px 7px;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      background: #f8fafc;
+      color: #94a3b8;
+    }
+    .preview-action {
+      width: 100%;
+      margin-top: 10px;
+      padding: 7px;
+      border-radius: 5px;
+      background: #3b82f6;
+      color: white;
+      font-weight: 700;
+      text-align: center;
+    }
+    .preview-action.green {
+      background: #28a745;
+    }
+    .preview-action.blue {
+      background: #4ba8ff;
+    }
+    .preview-chart {
+      position: relative;
+      min-height: 135px;
+      padding: 8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      background:
+        linear-gradient(#eef2f7 1px, transparent 1px),
+        linear-gradient(90deg, #eef2f7 1px, transparent 1px),
+        white;
+      background-size: 100% 25%, 20% 100%;
+    }
+    .preview-chart svg {
+      display: block;
+      width: 100%;
+      height: 115px;
+    }
+    .preview-view-buttons,
+    .preview-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 5px;
+      margin: 10px 0;
+    }
+    .preview-pill {
+      padding: 4px 7px;
+      border: 1px solid #d5dce3;
+      border-radius: 4px;
+      background: #f8f9fa;
+      color: #475569;
+    }
+    .preview-pill.active-green {
+      border-color: #28a745;
+      background: #28a745;
+      color: white;
+    }
+    .preview-pill.active-blue {
+      border-color: #4ba8ff;
+      background: #4ba8ff;
+      color: white;
+    }
+    .preview-tab {
+      padding: 5px 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 5px 5px 0 0;
+      background: #f5f5f5;
+    }
+    .preview-tab.active {
+      background: white;
+      font-weight: 600;
+    }
+    .preview-note {
+      margin: 10px 0 0;
+      padding: 7px 9px;
+      border-radius: 5px;
+      background: #eef6ff;
+      color: #315b80;
+      font-size: 10px;
+      text-align: center;
+    }
+    .preview-empty {
+      display: grid;
+      min-height: 250px;
+      place-items: center;
+      padding: 25px;
+      border: 2px dashed #cbd5e1;
+      background: #f8fafc;
+      text-align: center;
+    }
+    .preview-empty strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #475569;
+      font-size: 16px;
+    }
     form {
       background: white;
       padding: 25px;
@@ -341,6 +593,20 @@
       .version-selector {
         grid-template-columns: repeat(3, 1fr);
       }
+      .version-design-heading {
+        display: block;
+      }
+      .version-design-heading span {
+        display: block;
+        margin-top: 3px;
+      }
+      .preview-v1-grid,
+      .preview-fields {
+        grid-template-columns: 1fr;
+      }
+      .preview-canvas {
+        padding: 12px;
+      }
     }
   </style>
 </head>
@@ -388,6 +654,14 @@
         <p id="versionResult">Es la página estática actual: calcula en CLP y presenta los resultados por día, semana, mes o año mediante gráfico y tabla.</p>
       </div>
     </article>
+
+    <div class="version-design">
+      <div class="version-design-heading">
+        <h3>Diseño de la versión seleccionada</h3>
+        <span id="versionDesignLabel">Reconstrucción basada en el historial de Git</span>
+      </div>
+      <div id="versionPreview" aria-live="polite"></div>
+    </div>
   </section>
 
   <form id="calcForm">
@@ -544,24 +818,200 @@
     }
   };
 
+  function envolverVistaPrevia(version, contenido) {
+    return `
+      <div class="preview-browser">
+        <div class="preview-browser-bar" aria-hidden="true">
+          <span class="preview-browser-dot"></span>
+          <span class="preview-browser-dot"></span>
+          <span class="preview-browser-dot"></span>
+          <span class="preview-browser-address">calculadora-lbic.local/${version}</span>
+        </div>
+        ${contenido}
+      </div>
+    `;
+  }
+
+  function crearGraficoPrevia(mostrarPeriodoCero) {
+    return `
+      <div class="preview-chart" aria-label="Representación del gráfico de resultados">
+        <svg viewBox="0 0 420 115" role="img" aria-label="Línea ascendente del capital acumulado">
+          <polyline
+            points="8,101 58,94 108,83 158,76 208,61 258,52 308,35 358,25 412,10"
+            fill="none"
+            stroke="#28a745"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+          </polyline>
+          <circle cx="8" cy="101" r="4" fill="#28a745"></circle>
+          <circle cx="108" cy="83" r="4" fill="#28a745"></circle>
+          <circle cx="208" cy="61" r="4" fill="#28a745"></circle>
+          <circle cx="308" cy="35" r="4" fill="#28a745"></circle>
+          <circle cx="412" cy="10" r="4" fill="#28a745"></circle>
+          <text x="7" y="113" font-size="9" fill="#64748b">${mostrarPeriodoCero ? 'Día 0' : 'Día 1'}</text>
+          <text x="374" y="113" font-size="9" fill="#64748b">Día 365</text>
+        </svg>
+      </div>
+    `;
+  }
+
+  function crearVistaV1() {
+    return envolverVistaPrevia('v1', `
+      <div class="preview-canvas preview-v1">
+        <div class="preview-header-v1">
+          <div class="preview-logos">
+            <img src="Logo liceo.png" alt="Logo Liceo" class="preview-logo">
+            <img src="logo_especialidad.png" alt="Logo Especialidad" class="preview-logo">
+          </div>
+          <h4 class="preview-title">Calculadora de Intereses L.B.I.C</h4>
+          <p class="preview-subtitle">Calcula y visualiza tus ahorros con interés compuesto y aportaciones periódicas.</p>
+        </div>
+        <div class="preview-v1-grid">
+          <div class="preview-card">
+            <h5 class="preview-card-title">Calculadora de Intereses</h5>
+            <div class="preview-fields">
+              <div>
+                <span class="preview-field-label">Capital inicial ($)</span>
+                <div class="preview-fake-input">1000</div>
+              </div>
+              <div>
+                <span class="preview-field-label">Tasa de interés (%)</span>
+                <div class="preview-fake-input">5</div>
+              </div>
+              <div>
+                <span class="preview-field-label">Aportación periódica</span>
+                <div class="preview-fake-input">0</div>
+              </div>
+              <div>
+                <span class="preview-field-label">Duración (meses)</span>
+                <div class="preview-fake-input">12</div>
+              </div>
+            </div>
+            <div class="preview-action">Calcular</div>
+          </div>
+          <div class="preview-card">
+            <h5 class="preview-card-title">Gráfico de Balance</h5>
+            ${crearGraficoPrevia(false)}
+          </div>
+        </div>
+        <p class="preview-note">Diseño original React: tarjetas redondeadas, dos columnas y paleta azul/morado.</p>
+      </div>
+    `);
+  }
+
+  function crearVistaEstatica(version, nota, opciones = {}) {
+    const esFinal = opciones.esFinal === true;
+    const claseActiva = esFinal ? 'active-blue' : 'active-green';
+    const claseAccion = esFinal ? 'blue' : 'green';
+    const pestanaGrafico = opciones.sinIconos ? 'Gráfico' : '📈 Gráfico';
+    const pestanaTabla = opciones.sinIconos ? 'Tabla' : '📊 Tabla';
+
+    return envolverVistaPrevia(version, `
+      <div class="preview-canvas preview-static">
+        <div class="preview-header-static">
+          <img src="Logo liceo.png" alt="Logo Liceo" class="preview-logo">
+          <h4 class="preview-title">Calculadora L.B.I.C</h4>
+          <img src="logo_especialidad.png" alt="Logo Especialidad" class="preview-logo">
+        </div>
+        <div class="preview-card">
+          <div class="preview-fields">
+            <div>
+              <span class="preview-field-label">Monto inicial (CLP)</span>
+              <div class="preview-fake-input">1.000.000</div>
+            </div>
+            <div>
+              <span class="preview-field-label">Ingreso periódico (CLP)</span>
+              <div class="preview-fake-input">100.000 · Mensual</div>
+            </div>
+            <div>
+              <span class="preview-field-label">Interés anual (%)</span>
+              <div class="preview-fake-input">5</div>
+            </div>
+            <div>
+              <span class="preview-field-label">Plazo de inversión</span>
+              <div class="preview-fake-input">12 · Meses</div>
+            </div>
+          </div>
+          <div class="preview-action ${claseAccion}">Calcular</div>
+        </div>
+        <div class="preview-card">
+          <h5 class="preview-card-title">Resultados</h5>
+          <div class="preview-view-buttons">
+            <span class="preview-pill ${claseActiva}">Día a día</span>
+            <span class="preview-pill">Semana a semana</span>
+            <span class="preview-pill">Mes a mes</span>
+            <span class="preview-pill">Año a año</span>
+          </div>
+          <div class="preview-tabs">
+            <span class="preview-tab active">${pestanaGrafico}</span>
+            <span class="preview-tab">${pestanaTabla}</span>
+          </div>
+          ${crearGraficoPrevia(opciones.periodoCero === true)}
+        </div>
+        <p class="preview-note">${nota}</p>
+      </div>
+    `);
+  }
+
+  const vistasVersiones = {
+    v1: crearVistaV1,
+    v2: () => crearVistaEstatica(
+      'v2',
+      'Nueva interfaz estática con botones verdes. El cambio principal fue abandonar React y concentrar todo en index.html.'
+    ),
+    v3: () => crearVistaEstatica(
+      'v3',
+      'El diseño se mantuvo igual a v2; la diferencia estuvo en aplicar el aporte antes del interés diario.'
+    ),
+    v4: () => crearVistaEstatica(
+      'v4',
+      'El aspecto siguió igual; internamente se reemplazó el cálculo por módulo con un contador de días.'
+    ),
+    v5: () => envolverVistaPrevia('v5', `
+      <div class="preview-empty">
+        <div>
+          <strong>No existe un diseño v5 registrado</strong>
+          <span>Git salta de v4 a v6, por lo que no hay una interfaz histórica verificable para mostrar.</span>
+        </div>
+      </div>
+    `),
+    v6: () => crearVistaEstatica(
+      'v6-final',
+      'Diseño final actual: botones azules, pestañas sin emojis y gráfico iniciado en el período 0.',
+      { esFinal: true, sinIconos: true, periodoCero: true }
+    )
+  };
+
+  function mostrarVersion(versionId, botonActivo) {
+    const version = historialVersiones[versionId];
+    const crearVista = vistasVersiones[versionId];
+    if (!version || !crearVista) return;
+
+    document.querySelectorAll('.version-button').forEach(versionButton => {
+      const estaActivo = versionButton === botonActivo;
+      versionButton.classList.toggle('active', estaActivo);
+      versionButton.setAttribute('aria-pressed', estaActivo.toString());
+    });
+
+    document.getElementById('versionTitle').textContent = version.titulo;
+    document.getElementById('versionState').textContent = version.estado;
+    document.getElementById('versionProblem').textContent = version.problema;
+    document.getElementById('versionChange').textContent = version.cambio;
+    document.getElementById('versionResult').textContent = version.resultado;
+    document.getElementById('versionPreview').innerHTML = crearVista();
+    document.getElementById('versionDesignLabel').textContent = versionId === 'v5'
+      ? 'No hay evidencia visual disponible en Git'
+      : 'Reconstrucción basada en el historial de Git';
+  }
+
   document.querySelectorAll('.version-button').forEach(button => {
     button.addEventListener('click', function() {
-      const version = historialVersiones[this.dataset.version];
-      if (!version) return;
-
-      document.querySelectorAll('.version-button').forEach(versionButton => {
-        const estaActivo = versionButton === this;
-        versionButton.classList.toggle('active', estaActivo);
-        versionButton.setAttribute('aria-pressed', estaActivo.toString());
-      });
-
-      document.getElementById('versionTitle').textContent = version.titulo;
-      document.getElementById('versionState').textContent = version.estado;
-      document.getElementById('versionProblem').textContent = version.problema;
-      document.getElementById('versionChange').textContent = version.cambio;
-      document.getElementById('versionResult').textContent = version.resultado;
+      mostrarVersion(this.dataset.version, this);
     });
   });
+
+  mostrarVersion('v6', document.querySelector('.version-button[data-version="v6"]'));
   
   // Event listeners para los controles de paginación - Definidos primero
   document.getElementById('btnAnterior').addEventListener('click', function() {
