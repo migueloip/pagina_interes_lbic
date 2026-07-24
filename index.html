@@ -71,7 +71,7 @@
     }
     .version-selector {
       display: grid;
-      grid-template-columns: repeat(6, minmax(58px, 1fr));
+      grid-template-columns: repeat(5, minmax(58px, 1fr));
       gap: 8px;
       margin-bottom: 18px;
     }
@@ -364,21 +364,6 @@
       font-size: 10px;
       text-align: center;
     }
-    .preview-empty {
-      display: grid;
-      min-height: 250px;
-      place-items: center;
-      padding: 25px;
-      border: 2px dashed #cbd5e1;
-      background: #f8fafc;
-      text-align: center;
-    }
-    .preview-empty strong {
-      display: block;
-      margin-bottom: 5px;
-      color: #475569;
-      font-size: 16px;
-    }
     form {
       background: white;
       padding: 25px;
@@ -632,13 +617,12 @@
       <button type="button" class="version-button" data-version="v2" aria-pressed="false">v2</button>
       <button type="button" class="version-button" data-version="v3" aria-pressed="false">v3</button>
       <button type="button" class="version-button" data-version="v4" aria-pressed="false">v4</button>
-      <button type="button" class="version-button" data-version="v5" aria-pressed="false">v5</button>
-      <button type="button" class="version-button active" data-version="v6" aria-pressed="true">v6</button>
+      <button type="button" class="version-button active" data-version="v5" aria-pressed="true">v5</button>
     </div>
 
     <article class="version-summary" aria-live="polite">
       <div class="version-summary-heading">
-        <h3 id="versionTitle">v6 — Presentación del punto de partida</h3>
+        <h3 id="versionTitle">v5 — Presentación del punto de partida</h3>
         <span id="versionState" class="version-state">Versión final actual</span>
       </div>
       <div class="version-detail">
@@ -803,14 +787,7 @@
       resultado: 'Los aportes semanales, mensuales y anuales se controlan de forma más estable. Como efecto pendiente, la opción diaria suma un aporte inicial y otro en el día 1.'
     },
     v5: {
-      titulo: 'v5 — Versión no registrada',
-      estado: 'Sin commit en Git',
-      problema: 'El historial del repositorio salta directamente de v4 a v6; no existe un commit ni contenido identificado como v5.',
-      cambio: 'No hay cambios comprobables que se puedan atribuir a esta versión sin inventar información.',
-      resultado: 'Se conserva este paso en el selector para respetar la numeración solicitada y dejar documentado el salto del historial.'
-    },
-    v6: {
-      titulo: 'v6 — Presentación del punto de partida',
+      titulo: 'v5 — Presentación del punto de partida',
       estado: 'Versión final actual',
       problema: 'El gráfico y la tabla comenzaban en el primer día, por lo que no mostraban el capital antes de generar intereses. La lógica diaria heredada todavía agrega un aporte inicial adicional.',
       cambio: 'Se añadió el período 0 con el monto inicial. Después se simplificaron las pestañas, se cambiaron los botones a azul y se agregó el favicon.',
@@ -968,16 +945,8 @@
       'v4',
       'El aspecto siguió igual; internamente se reemplazó el cálculo por módulo con un contador de días.'
     ),
-    v5: () => envolverVistaPrevia('v5', `
-      <div class="preview-empty">
-        <div>
-          <strong>No existe un diseño v5 registrado</strong>
-          <span>Git salta de v4 a v6, por lo que no hay una interfaz histórica verificable para mostrar.</span>
-        </div>
-      </div>
-    `),
-    v6: () => crearVistaEstatica(
-      'v6-final',
+    v5: () => crearVistaEstatica(
+      'v5-final',
       'Diseño final actual: botones azules, pestañas sin emojis y gráfico iniciado en el período 0.',
       { esFinal: true, sinIconos: true, periodoCero: true }
     )
@@ -1000,9 +969,7 @@
     document.getElementById('versionChange').textContent = version.cambio;
     document.getElementById('versionResult').textContent = version.resultado;
     document.getElementById('versionPreview').innerHTML = crearVista();
-    document.getElementById('versionDesignLabel').textContent = versionId === 'v5'
-      ? 'No hay evidencia visual disponible en Git'
-      : 'Reconstrucción basada en el historial de Git';
+    document.getElementById('versionDesignLabel').textContent = 'Reconstrucción basada en el historial de Git';
   }
 
   document.querySelectorAll('.version-button').forEach(button => {
@@ -1011,7 +978,7 @@
     });
   });
 
-  mostrarVersion('v6', document.querySelector('.version-button[data-version="v6"]'));
+  mostrarVersion('v5', document.querySelector('.version-button[data-version="v5"]'));
   
   // Event listeners para los controles de paginación - Definidos primero
   document.getElementById('btnAnterior').addEventListener('click', function() {
