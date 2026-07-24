@@ -6,6 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calculadora L.B.I.C</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    window.MathJax = {
+      startup: {
+        pageReady() {
+          return window.MathJax.startup.defaultPageReady().then(() => {
+            if (typeof window.renderizarFormulaSeleccionada === 'function') {
+              window.renderizarFormulaSeleccionada();
+            }
+          });
+        }
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -138,6 +152,10 @@
       font-size: 13px;
       line-height: 1.5;
       white-space: pre-wrap;
+    }
+    .version-formula mjx-container {
+      min-width: max-content;
+      margin: 2px 0 !important;
     }
     .formula-legend {
       display: block;
@@ -645,9 +663,9 @@
       </div>
       <div class="version-detail">
         <strong>Fórmula usada</strong>
-        <p id="versionFormula" class="version-formula">t_d = (1 + T_anual / 100)^(1 / 365) − 1
-M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</p>
-        <small class="formula-legend">T = tasa ingresada · t = tasa convertida · M/B = saldo · d = día · m = mes</small>
+        <div id="versionFormula" class="version-formula">t_d = (1 + T_anual / 100)^(1 / 365) − 1
+M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
+        <small class="formula-legend">T = tasa · t = tasa convertida · M/B = saldo · A = aporte · C = capital · f = frecuencia · c = contador · V = valor mostrado</small>
       </div>
       <div class="version-detail">
         <strong>Por qué fallaba o qué limitaba</strong>
@@ -786,6 +804,16 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</p>
       titulo: 'v1 — Primera versión en React',
       estado: 'Inicio · abril de 2025',
       formula: 't_m = tasa / 100; anual: t_m ÷ 12; trimestral: t_m ÷ 3; diario: t_m × 30\nB_m = B_m₋₁ + (B_m₋₁ × t_m) + aporte',
+      latex: String.raw`\begin{aligned}
+        t_m &=
+        \begin{cases}
+          \dfrac{T}{100 \cdot 12} & \text{si la tasa es anual}\\
+          \dfrac{T}{100 \cdot 3} & \text{si es trimestral}\\
+          \dfrac{30T}{100} & \text{si es diaria}\\
+          \dfrac{T}{100} & \text{si es mensual}
+        \end{cases}\\
+        B_m &= B_{m-1}(1+t_m)+A_m
+      \end{aligned}`,
       problema: 'Las tasas se convertían de forma lineal: una tasa diaria se multiplicaba por 30 y una anual se dividía por 12, sin conservar la equivalencia del interés compuesto. Además, el aporte se agregaba después del interés, por lo que no rendía durante ese mes.',
       cambio: 'Se creó la calculadora de interés compuesto con aportes periódicos, resumen, tabla, gráfico y logos; luego se eliminó la importación innecesaria.',
       resultado: 'Una primera aplicación funcional y modular, pero con una estructura más compleja de desplegar y mantener para una página pequeña.'
@@ -794,6 +822,15 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</p>
       titulo: 'v2 — Conversión a una página estática',
       estado: 'Reestructuración · mayo de 2025',
       formula: 't_d = (1 + T_anual / 100)^(1 / 365) − 1\nM_d = M_d₋₁ × (1 + t_d) + aporte si d % frecuencia = 0',
+      latex: String.raw`\begin{aligned}
+        t_d &= \left(1+\dfrac{T_{\mathrm{anual}}}{100}\right)^{\frac{1}{365}}-1\\
+        A_d &=
+        \begin{cases}
+          A & \text{si } d \bmod f = 0\\
+          0 & \text{en otro caso}
+        \end{cases}\\
+        M_d &= M_{d-1}(1+t_d)+A_d
+      \end{aligned}`,
       problema: 'La tasa diaria efectiva estaba mejor calculada, pero el interés se aplicaba antes del aporte. Además, comprobar d % 30,4167 = 0 con días enteros casi nunca se cumplía, por lo que los aportes mensuales podían omitirse.',
       cambio: 'React y Vite se reemplazaron por un solo index.html con CSS y JavaScript. Se incorporaron Chart.js, moneda CLP, vistas por período, tabla y paginación.',
       resultado: 'La aplicación quedó lista para abrirse o publicarse directamente, aunque el orden del cálculo y algunos aportes periódicos todavía necesitaban ajustes.'
@@ -802,6 +839,15 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</p>
       titulo: 'v3 — Corrección del orden de cálculo',
       estado: 'Ajuste de fórmula · mayo de 2025',
       formula: 't_d = (1 + T_anual / 100)^(1 / 365) − 1\nM_d = (M_d₋₁ + aporte si d % frecuencia = 0) × (1 + t_d)',
+      latex: String.raw`\begin{aligned}
+        t_d &= \left(1+\dfrac{T_{\mathrm{anual}}}{100}\right)^{\frac{1}{365}}-1\\
+        A_d &=
+        \begin{cases}
+          A & \text{si } d \bmod f = 0\\
+          0 & \text{en otro caso}
+        \end{cases}\\
+        M_d &= (M_{d-1}+A_d)(1+t_d)
+      \end{aligned}`,
       problema: 'Se corrigió el orden para que el aporte generara interés el mismo día, pero continuó la condición d % 30,4167 = 0. Por eso la frecuencia mensual todavía podía no ejecutar sus aportes.',
       cambio: 'El aporte periódico pasó a sumarse antes de aplicar la tasa diaria.',
       resultado: 'El orden financiero quedó más coherente, pero la frecuencia mensual todavía podía fallar por depender de una comparación con días decimales.'
@@ -810,6 +856,16 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</p>
       titulo: 'v4 — Control de frecuencia de aportes',
       estado: 'Corrección de periodicidad · mayo de 2025',
       formula: 'contador = contador + 1; si contador ≥ frecuencia: M = M + aporte y contador = 0\nM_d = M × (1 + t_d); para frecuencia diaria: M_0 = capital + aporte',
+      latex: String.raw`\begin{aligned}
+        c_d &= c_{d-1}+1\\
+        A_d &=
+        \begin{cases}
+          A & \text{si } c_d \ge f\\
+          0 & \text{si } c_d < f
+        \end{cases}\\
+        M_d &= (M_{d-1}+A_d)(1+t_d), \qquad c_d \leftarrow 0 \text{ al aportar}\\
+        M_0 &= C+A \qquad \text{cuando } f=1
+      \end{aligned}`,
       problema: 'El contador solucionó la comparación con decimales, pero la frecuencia diaria agregó un aporte antes del ciclo y volvió a agregar otro en el día 1. Además, un mes quedó aproximado como un intervalo de 30,4167 días.',
       cambio: 'Se agregó un contador de días desde el último aporte y se reinicia cada vez que corresponde aportar. También se incorporó un aporte inicial especial para la frecuencia diaria.',
       resultado: 'Los aportes semanales, mensuales y anuales se controlan de forma más estable. Como efecto pendiente, la opción diaria suma un aporte inicial y otro en el día 1.'
@@ -818,10 +874,52 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</p>
       titulo: 'v5 — Presentación del punto de partida',
       estado: 'Versión final actual',
       formula: 't_d = (1 + T_anual / 100)^(1 / 365) − 1\nM_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)',
+      latex: String.raw`\begin{aligned}
+        t_d &= \left(1+\dfrac{T_{\mathrm{anual}}}{100}\right)^{\frac{1}{365}}-1\\
+        M_d &= (M_{d-1}+A_d)(1+t_d)\\
+        V_0 &= C \qquad \text{(punto inicial mostrado)}
+      \end{aligned}`,
       problema: 'El cálculo no cambió respecto de v4: conserva el aporte diario adicional y usa intervalos promedio en vez de fechas reales. El período 0 mejora la visualización, pero no corrige esas limitaciones internas.',
       cambio: 'Se añadió el período 0 con el monto inicial. Después se simplificaron las pestañas, se cambiaron los botones a azul y se agregó el favicon.',
       resultado: 'Es la página estática actual: calcula en CLP y presenta los resultados por día, semana, mes o año mediante gráfico y tabla.'
     }
+  };
+
+  let formulaSeleccionada = historialVersiones.v5;
+  let turnoFormula = 0;
+  let colaFormula = Promise.resolve();
+
+  function actualizarFormulaMatematica(version) {
+    const formulaElement = document.getElementById('versionFormula');
+    const turnoActual = ++turnoFormula;
+    formulaSeleccionada = version;
+
+    if (
+      typeof window.MathJax?.typesetClear !== 'function' ||
+      typeof window.MathJax?.typesetPromise !== 'function'
+    ) {
+      formulaElement.textContent = version.formula;
+      return;
+    }
+
+    colaFormula = colaFormula
+      .then(() => {
+        if (turnoActual !== turnoFormula) return;
+
+        window.MathJax.typesetClear([formulaElement]);
+        formulaElement.textContent = `\\[${version.latex}\\]`;
+        return window.MathJax.typesetPromise([formulaElement]);
+      })
+      .catch(error => {
+        if (turnoActual === turnoFormula) {
+          formulaElement.textContent = version.formula;
+        }
+        console.error('No fue posible renderizar la fórmula con MathJax:', error);
+      });
+  }
+
+  window.renderizarFormulaSeleccionada = function() {
+    actualizarFormulaMatematica(formulaSeleccionada);
   };
 
   function envolverVistaPrevia(version, contenido) {
@@ -994,7 +1092,7 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</p>
 
     document.getElementById('versionTitle').textContent = version.titulo;
     document.getElementById('versionState').textContent = version.estado;
-    document.getElementById('versionFormula').textContent = version.formula;
+    actualizarFormulaMatematica(version);
     document.getElementById('versionProblem').textContent = version.problema;
     document.getElementById('versionChange').textContent = version.cambio;
     document.getElementById('versionResult').textContent = version.resultado;
