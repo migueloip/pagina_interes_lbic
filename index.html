@@ -163,6 +163,115 @@
       color: #6b7c8c;
       font-size: 12px;
     }
+    .version-code {
+      margin-top: 18px;
+      border: 1px solid #cad8e5;
+      border-radius: 6px;
+      background: white;
+    }
+    .version-code summary {
+      padding: 11px 13px;
+      color: #174f82;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+    }
+    .version-code[open] summary {
+      border-bottom: 1px solid #dce6f0;
+      background: #f3f8fd;
+    }
+    .version-code-content {
+      padding: 13px;
+      animation: show-version-code 0.2s ease-out;
+    }
+    @keyframes show-version-code {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .code-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 9px;
+      color: #5b6b79;
+      font-size: 12px;
+    }
+    .code-legend-item::before {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 5px;
+      border-radius: 2px;
+      content: '';
+    }
+    .code-legend-item.problem::before {
+      background: #ef4444;
+    }
+    .code-legend-item.fixed::before {
+      background: #22c55e;
+    }
+    .version-code-block {
+      overflow-x: auto;
+      margin: 0;
+      border-radius: 6px;
+      background: #111827;
+      color: #dbeafe;
+      font: 12px/1.55 Consolas, 'Courier New', monospace;
+      tab-size: 2;
+    }
+    .version-code-block code {
+      display: block;
+      min-width: max-content;
+      padding: 10px 0;
+    }
+    .code-line {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      min-height: 19px;
+      padding-right: 12px;
+      white-space: pre;
+    }
+    .code-line.problem {
+      background: rgba(239, 68, 68, 0.22);
+      box-shadow: inset 3px 0 #ef4444;
+    }
+    .code-line.fixed {
+      background: rgba(34, 197, 94, 0.2);
+      box-shadow: inset 3px 0 #22c55e;
+    }
+    .code-line-number {
+      padding-right: 9px;
+      color: #718096;
+      text-align: right;
+      user-select: none;
+    }
+    .code-line.problem .code-line-number {
+      color: #fca5a5;
+    }
+    .code-line.fixed .code-line-number {
+      color: #86efac;
+    }
+    .version-code-notes {
+      margin: 11px 0 0;
+      padding-left: 20px;
+      color: #465563;
+      font-size: 13px;
+    }
+    .version-code-notes li + li {
+      margin-top: 5px;
+    }
+    .version-code-notes .problem {
+      color: #9f2525;
+    }
+    .version-code-notes .fixed {
+      color: #166534;
+    }
     .version-design {
       margin-top: 20px;
       padding-top: 20px;
@@ -697,6 +806,17 @@ M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
         <strong>Resultado</strong>
         <p id="versionResult">La proyección comienza únicamente con el capital, realiza el primer aporte al completar su frecuencia y muestra fechas reales en gráficos y tablas.</p>
       </div>
+      <details class="version-code">
+        <summary id="versionCodeTitle">Ver código del cálculo de v6</summary>
+        <div class="version-code-content">
+          <div class="code-legend" aria-label="Leyenda del código">
+            <span class="code-legend-item problem">Línea problemática</span>
+            <span class="code-legend-item fixed">Línea corregida</span>
+          </div>
+          <pre class="version-code-block"><code id="versionCode"></code></pre>
+          <ul id="versionCodeNotes" class="version-code-notes"></ul>
+        </div>
+      </details>
     </article>
 
     <div class="version-design">
@@ -842,6 +962,28 @@ M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
         \end{cases}\\
         B_m &= B_{m-1}(1+t_m)+A_m
       \end{aligned}`,
+      codigo: String.raw`let monthlyRate = rate / 100;
+if (interestType === "anual") monthlyRate /= 12;
+if (interestType === "trimestral") monthlyRate /= 3;
+if (interestType === "diario") monthlyRate *= 30;
+
+for (let month = 1; month <= months; month++) {
+  const monthlyInterest = balance * monthlyRate;
+  const deposit = obtenerAporte(month);
+  balance += monthlyInterest + deposit;
+}`,
+      marcasCodigo: [
+        {
+          lineas: [2, 3, 4],
+          tipo: 'problem',
+          mensaje: 'Las tasas se transformaban linealmente. Dividir por 12 o multiplicar por 30 no conserva la equivalencia de una tasa compuesta.'
+        },
+        {
+          lineas: [9],
+          tipo: 'problem',
+          mensaje: 'El aporte se sumaba después de calcular el interés mensual, así que no generaba rendimiento en ese período.'
+        }
+      ],
       problema: 'Las tasas se convertían de forma lineal: una tasa diaria se multiplicaba por 30 y una anual se dividía por 12, sin conservar la equivalencia del interés compuesto. Además, el aporte se agregaba después del interés, por lo que no rendía durante ese mes.',
       cambio: 'Se creó la calculadora de interés compuesto con aportes periódicos, resumen, tabla, gráfico y logos; luego se eliminó la importación innecesaria.',
       resultado: 'Una primera aplicación funcional y modular, pero con una estructura más compleja de desplegar y mantener para una página pequeña.'
@@ -859,6 +1001,33 @@ M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
         \end{cases}\\
         M_d &= M_{d-1}(1+t_d)+A_d
       \end{aligned}`,
+      codigo: String.raw`const tasaDiaria = Math.pow(1 + interesAnual / 100, 1 / 365) - 1;
+const diasEntreAportes = obtenerDiasEntreAportes(frecuenciaIngreso);
+
+for (let dia = 1; dia <= totalDias; dia++) {
+  monto = monto * (1 + tasaDiaria);
+
+  if (dia % diasEntreAportes === 0 || diasEntreAportes === 1) {
+    monto += ingresoPeriodico;
+  }
+}`,
+      marcasCodigo: [
+        {
+          lineas: [1],
+          tipo: 'fixed',
+          mensaje: 'Se introdujo una tasa diaria efectiva derivada de la tasa anual.'
+        },
+        {
+          lineas: [5],
+          tipo: 'problem',
+          mensaje: 'El interés todavía se calculaba antes de incorporar el aporte del día.'
+        },
+        {
+          lineas: [7],
+          tipo: 'problem',
+          mensaje: 'Para meses, diasEntreAportes valía 30,4167. Un día entero casi nunca tiene módulo cero con ese decimal.'
+        }
+      ],
       problema: 'La tasa diaria efectiva estaba mejor calculada, pero el interés se aplicaba antes del aporte. Además, comprobar d % 30,4167 = 0 con días enteros casi nunca se cumplía, por lo que los aportes mensuales podían omitirse.',
       cambio: 'React y Vite se reemplazaron por un solo index.html con CSS y JavaScript. Se incorporaron Chart.js, moneda CLP, vistas por período, tabla y paginación.',
       resultado: 'La aplicación quedó lista para abrirse o publicarse directamente, aunque el orden del cálculo y algunos aportes periódicos todavía necesitaban ajustes.'
@@ -876,6 +1045,28 @@ M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
         \end{cases}\\
         M_d &= (M_{d-1}+A_d)(1+t_d)
       \end{aligned}`,
+      codigo: String.raw`const tasaDiaria = Math.pow(1 + interesAnual / 100, 1 / 365) - 1;
+const diasEntreAportes = obtenerDiasEntreAportes(frecuenciaIngreso);
+
+for (let dia = 1; dia <= totalDias; dia++) {
+  if (dia % diasEntreAportes === 0 || diasEntreAportes === 1) {
+    monto += ingresoPeriodico;
+  }
+
+  monto = monto * (1 + tasaDiaria);
+}`,
+      marcasCodigo: [
+        {
+          lineas: [5],
+          tipo: 'problem',
+          mensaje: 'La comparación con 30,4167 días seguía omitiendo aportes mensuales.'
+        },
+        {
+          lineas: [6, 9],
+          tipo: 'fixed',
+          mensaje: 'El aporte pasó a incorporarse antes del interés, de modo que comienza a rendir ese mismo día.'
+        }
+      ],
       problema: 'Se corrigió el orden para que el aporte generara interés el mismo día, pero continuó la condición d % 30,4167 = 0. Por eso la frecuencia mensual todavía podía no ejecutar sus aportes.',
       cambio: 'El aporte periódico pasó a sumarse antes de aplicar la tasa diaria.',
       resultado: 'El orden financiero quedó más coherente, pero la frecuencia mensual todavía podía fallar por depender de una comparación con días decimales.'
@@ -894,6 +1085,33 @@ M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
         M_d &= (M_{d-1}+A_d)(1+t_d), \qquad c_d \leftarrow 0 \text{ al aportar}\\
         M_0 &= C+A \qquad \text{cuando } f=1
       \end{aligned}`,
+      codigo: String.raw`const diasEntreAportes = obtenerDiasEntreAportes(frecuenciaIngreso);
+let diasDesdeUltimoAporte = 0;
+
+if (frecuenciaIngreso === 'diario') {
+  monto += ingresoPeriodico;
+}
+
+for (let dia = 1; dia <= totalDias; dia++) {
+  diasDesdeUltimoAporte++;
+  if (diasDesdeUltimoAporte >= diasEntreAportes) {
+    monto += ingresoPeriodico;
+    diasDesdeUltimoAporte = 0;
+  }
+  monto *= 1 + tasaDiaria;
+}`,
+      marcasCodigo: [
+        {
+          lineas: [4, 5, 6],
+          tipo: 'problem',
+          mensaje: 'Este bloque sumaba un aporte antes del día 1; el ciclo volvía a aportar en el propio día 1.'
+        },
+        {
+          lineas: [9, 10, 11, 12],
+          tipo: 'fixed',
+          mensaje: 'El contador reemplazó la comparación de módulo y permitió ejecutar aportes mensuales aproximados.'
+        }
+      ],
       problema: 'El contador solucionó la comparación con decimales, pero la frecuencia diaria agregó un aporte antes del ciclo y volvió a agregar otro en el día 1. Además, un mes quedó aproximado como un intervalo de 30,4167 días.',
       cambio: 'Se agregó un contador de días desde el último aporte y se reinicia cada vez que corresponde aportar. También se incorporó un aporte inicial especial para la frecuencia diaria.',
       resultado: 'Los aportes semanales, mensuales y anuales se controlan de forma más estable. Como efecto pendiente, la opción diaria suma un aporte inicial y otro en el día 1.'
@@ -907,6 +1125,44 @@ M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
         M_d &= (M_{d-1}+A_d)(1+t_d)\\
         V_0 &= C \qquad \text{(punto inicial mostrado)}
       \end{aligned}`,
+      codigo: String.raw`const DIAS_POR_MES = 30.4167;
+const tasaDiaria = Math.pow(1 + interesAnual / 100, 1 / 365) - 1;
+let monto = montoInicial;
+
+if (frecuenciaIngreso === 'diario') {
+  monto += ingresoPeriodico;
+}
+
+for (let dia = 1; dia <= totalDias; dia++) {
+  diasDesdeUltimoAporte++;
+  if (diasDesdeUltimoAporte >= diasEntreAportes) {
+    monto += ingresoPeriodico;
+    diasDesdeUltimoAporte = 0;
+  }
+  monto *= 1 + tasaDiaria;
+}
+
+datosActuales.push({
+  periodo: 0,
+  valor: montoInicial
+});`,
+      marcasCodigo: [
+        {
+          lineas: [1],
+          tipo: 'problem',
+          mensaje: 'Los meses seguían siendo un promedio fijo y no fechas reales de calendario.'
+        },
+        {
+          lineas: [5, 6, 7],
+          tipo: 'problem',
+          mensaje: 'El aporte previo al ciclo seguía produciendo una contribución diaria adicional.'
+        },
+        {
+          lineas: [18, 19, 20, 21],
+          tipo: 'fixed',
+          mensaje: 'Se añadió el período 0 a la visualización, pero esta mejora no modificó el cálculo interno.'
+        }
+      ],
       problema: 'El cálculo no cambió respecto de v4: conserva el aporte diario adicional y usa intervalos promedio en vez de fechas reales. El período 0 mejora la visualización, pero no corrige esas limitaciones internas.',
       cambio: 'Se añadió el período 0 con el monto inicial. Después se simplificaron las pestañas, se cambiaron los botones a azul y se agregó el favicon.',
       resultado: 'Fue la primera página estática final presentada, pero todavía calculaba meses aproximados y duplicaba el primer aporte diario.'
@@ -929,6 +1185,51 @@ M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
         \end{cases}\\
         M_d &= (M_{d-1}+A_d)(1+t_d), \qquad M_0=C
       \end{aligned}`,
+      codigo: String.raw`function obtenerProximaFechaAporte(inicio, frecuencia, numero) {
+  if (frecuencia === 'diario') return sumarDiasUTC(inicio, numero);
+  if (frecuencia === 'semanal') return sumarDiasUTC(inicio, numero * 7);
+  if (frecuencia === 'mensual') return sumarMesesCalendario(inicio, numero);
+  if (frecuencia === 'anual') return sumarAñosCalendario(inicio, numero);
+}
+
+let monto = montoInicial;
+let numeroAporte = 1;
+let proximaFecha = obtenerProximaFechaAporte(fechaInicio, frecuencia, numeroAporte);
+
+for (let dia = 1; dia <= totalDias; dia++) {
+  const fechaActual = sumarDiasUTC(fechaInicio, dia);
+  if (fechaActual.getTime() === proximaFecha.getTime()) {
+    monto += ingresoPeriodico;
+    proximaFecha = obtenerProximaFechaAporte(fechaInicio, frecuencia, ++numeroAporte);
+  }
+
+  const fechaDevengo = sumarDiasUTC(fechaActual, -1);
+  const diasDelAño = esAñoBisiesto(fechaDevengo.getUTCFullYear()) ? 366 : 365;
+  const tasaDiaria = Math.pow(1 + interesAnual / 100, 1 / diasDelAño) - 1;
+  monto *= 1 + tasaDiaria;
+}`,
+      marcasCodigo: [
+        {
+          lineas: [4, 5],
+          tipo: 'fixed',
+          mensaje: 'Los aportes mensuales y anuales usan aniversarios de calendario, incluyendo fines de mes.'
+        },
+        {
+          lineas: [8, 9, 10],
+          tipo: 'fixed',
+          mensaje: 'El saldo comienza solo con el capital y el primer aporte se programa para la primera fecha futura.'
+        },
+        {
+          lineas: [14, 15, 16, 17],
+          tipo: 'fixed',
+          mensaje: 'El aporte se ejecuta una sola vez cuando coincide con su fecha programada.'
+        },
+        {
+          lineas: [19, 20, 21],
+          tipo: 'fixed',
+          mensaje: 'La tasa diaria usa 365 o 366 días según el año del intervalo de devengo.'
+        }
+      ],
       problema: 'v5 agregaba un aporte diario antes del ciclo y aproximaba cada mes como 30,4167 días. Eso producía un aporte extra y desplazaba las fechas mensuales.',
       cambio: 'Se eliminó el aporte inicial duplicado, se agregó una fecha de inicio y los aportes mensuales o anuales se programan mediante fechas reales. Los años bisiestos usan 366 días.',
       resultado: 'La proyección comienza únicamente con el capital, realiza el primer aporte al completar su frecuencia y muestra fechas reales en gráficos y tablas.'
@@ -1140,6 +1441,42 @@ M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
     )
   };
 
+  function escaparHTML(texto) {
+    return texto
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function renderizarCodigoVersion(version) {
+    const marcasPorLinea = new Map();
+    version.marcasCodigo.forEach(marca => {
+      marca.lineas.forEach(linea => marcasPorLinea.set(linea, marca));
+    });
+
+    const codigoHTML = version.codigo.split('\n').map((linea, indice) => {
+      const numeroLinea = indice + 1;
+      const marca = marcasPorLinea.get(numeroLinea);
+      const clase = marca ? ` ${marca.tipo}` : '';
+      const titulo = marca ? ` title="${escaparHTML(marca.mensaje)}"` : '';
+
+      return `<span class="code-line${clase}"${titulo}><span class="code-line-number">${numeroLinea}</span><span>${escaparHTML(linea)}</span></span>`;
+    }).join('');
+
+    const notasHTML = version.marcasCodigo.map(marca => {
+      const etiqueta = marca.tipo === 'problem' ? 'Fallo' : 'Corrección';
+      const lineas = marca.lineas.length === 1 ? 'Línea' : 'Líneas';
+      return `<li class="${marca.tipo}"><strong>${etiqueta} · ${lineas} ${marca.lineas.join(', ')}:</strong> ${escaparHTML(marca.mensaje)}</li>`;
+    }).join('');
+
+    const nombreVersion = version.titulo.split('—')[0].trim();
+    document.getElementById('versionCodeTitle').textContent = `Ver código del cálculo de ${nombreVersion}`;
+    document.getElementById('versionCode').innerHTML = codigoHTML;
+    document.getElementById('versionCodeNotes').innerHTML = notasHTML;
+  }
+
   function mostrarVersion(versionId, botonActivo) {
     const version = historialVersiones[versionId];
     const crearVista = vistasVersiones[versionId];
@@ -1157,6 +1494,7 @@ M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
     document.getElementById('versionProblem').textContent = version.problema;
     document.getElementById('versionChange').textContent = version.cambio;
     document.getElementById('versionResult').textContent = version.resultado;
+    renderizarCodigoVersion(version);
     document.getElementById('versionPreview').innerHTML = crearVista();
     document.getElementById('versionDesignLabel').textContent = 'Reconstrucción basada en el historial de Git';
   }
