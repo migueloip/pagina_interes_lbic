@@ -803,11 +803,11 @@ M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
       </div>
       <div class="version-detail">
         <strong>Qué fallaba antes o qué limita esta versión</strong>
-        <p id="versionProblem">Tener más de una modalidad de tasa hacía confuso el objetivo: calcular interés compuesto mensual sobre el saldo acumulado.</p>
+        <p id="versionProblem">v5 sí capitalizaba el interés diariamente. Su limitación era metodológica: no utilizaba períodos mensuales explícitos ni separaba la ganancia de cada mes.</p>
       </div>
       <div class="version-detail">
-        <strong>Qué cambió</strong>
-        <p id="versionChange">Se dejó un único cálculo compuesto mensual. Cada mes aplica T/12 sobre el capital más todos los intereses y aportes acumulados.</p>
+        <strong>Cambio metodológico</strong>
+        <p id="versionChange">Se pasó de una capitalización diaria derivada de la tasa anual a una capitalización mensual explícita. Cada mes aplica T/12 sobre el saldo que ya contiene los intereses y aportes anteriores.</p>
       </div>
       <div class="version-detail">
         <strong>Resultado</strong>
@@ -1167,14 +1167,19 @@ datosActuales.push({
           mensaje: 'El aporte previo al ciclo seguía produciendo una contribución diaria adicional.'
         },
         {
+          lineas: [15],
+          tipo: 'problem',
+          mensaje: 'Esta línea sí producía interés compuesto diario, pero no separaba la ganancia del período ni seguía una metodología mensual explícita.'
+        },
+        {
           lineas: [18, 19, 20, 21],
           tipo: 'fixed',
           mensaje: 'Se añadió el período 0 a la visualización, pero esta mejora no modificó el cálculo interno.'
         }
       ],
-      problema: 'El cálculo no cambió respecto de v4: conserva el aporte diario adicional y usa intervalos promedio en vez de fechas reales. El período 0 mejora la visualización, pero no corrige esas limitaciones internas.',
+      problema: 'Sí calculaba interés sobre interés mediante capitalización diaria. Sus limitaciones eran metodológicas: no usaba períodos mensuales explícitos, no separaba la ganancia de cada mes y conservaba el aporte diario adicional.',
       cambio: 'Se añadió el período 0 con el monto inicial. Después se simplificaron las pestañas, se cambiaron los botones a azul y se agregó el favicon.',
-      resultado: 'Fue la primera página estática final presentada, pero todavía calculaba meses aproximados y duplicaba el primer aporte diario.'
+      resultado: 'Mostraba un saldo compuesto acumulado día a día, pero no presentaba una capitalización mensual verificable ni el interés de cada período por separado.'
     },
     v6: {
       titulo: 'v6 — Interés compuesto con calendario',
@@ -1245,8 +1250,8 @@ for (let dia = 1; dia <= totalDias; dia++) {
           mensaje: 'Aquí ocurre el interés compuesto: el interés se calcula sobre monto, que ya contiene los intereses ganados anteriormente.'
         }
       ],
-      problema: 'Tener más de una modalidad de tasa hacía confuso el objetivo de la calculadora: aplicar interés compuesto mensual sobre el saldo acumulado.',
-      cambio: 'Se dejó un único cálculo compuesto mensual. Cada mes aplica T/12 sobre el capital más todos los intereses y aportes acumulados.',
+      problema: 'v5 sí capitalizaba el interés diariamente. Su limitación era metodológica: no utilizaba períodos mensuales explícitos ni separaba la ganancia de cada mes.',
+      cambio: 'Se pasó de una capitalización diaria derivada de la tasa anual a una capitalización mensual explícita. Cada mes aplica T/12 sobre el saldo acumulado y registra la ganancia del período.',
       resultado: 'Con $100.000.000 al 5% anual, el primer mes gana $416.667, el segundo aproximadamente $418.403 y el año termina cerca de $105.116.190.'
     }
   };
