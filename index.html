@@ -791,27 +791,27 @@
 
     <article class="version-summary" aria-live="polite">
       <div class="version-summary-heading">
-        <h3 id="versionTitle">v6 — Calendario y tasas explícitas</h3>
+        <h3 id="versionTitle">v6 — Interés compuesto con calendario</h3>
         <span id="versionState" class="version-state">Versión final actual · julio de 2026</span>
       </div>
       <div class="version-detail">
         <strong>Fórmula usada</strong>
-        <div id="versionFormula" class="version-formula">i_m = T_nominal / (12 × 100)
+        <div id="versionFormula" class="version-formula">i_m = T_anual / (12 × 100)
 t_d,m = (1 + i_m)^(1 / N_m) − 1
 M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
-        <small class="formula-legend">T = tasa · t = tasa convertida · i = tasa mensual · N = días del mes de inversión · M/B = saldo · A = aporte · C = capital · D = días del año</small>
+        <small class="formula-legend">T = tasa anual · t = tasa diaria equivalente · i = tasa mensual · N = días del mes de inversión · M/B = saldo · A = aporte · C = capital</small>
       </div>
       <div class="version-detail">
         <strong>Qué fallaba antes o qué limita esta versión</strong>
-        <p id="versionProblem">v5 duplicaba el primer aporte diario y aproximaba los meses. La primera implementación de v6 corrigió eso, pero no explicaba si la tasa anual era nominal o efectiva.</p>
+        <p id="versionProblem">Tener más de una modalidad de tasa hacía confuso el objetivo: calcular interés compuesto mensual sobre el saldo acumulado.</p>
       </div>
       <div class="version-detail">
         <strong>Qué cambió</strong>
-        <p id="versionChange">Se incorporaron fechas reales, se eliminó el aporte duplicado y se agregó un selector entre tasa nominal mensual y efectiva anual, además de mostrar el interés ganado por período.</p>
+        <p id="versionChange">Se dejó un único cálculo compuesto mensual. Cada mes aplica T/12 sobre el capital más todos los intereses y aportes acumulados.</p>
       </div>
       <div class="version-detail">
         <strong>Resultado</strong>
-        <p id="versionResult">Con $100.000.000, 5% nominal anual y sin aportes, el primer mes gana $416.667 antes del redondeo.</p>
+        <p id="versionResult">Con $100.000.000 al 5% anual, el primer mes gana $416.667 y el segundo gana más porque calcula sobre el nuevo saldo.</p>
       </div>
       <details class="version-code">
         <summary id="versionCodeTitle">Ver código del cálculo de v6</summary>
@@ -866,14 +866,8 @@ M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
 
     <div class="form-group">
       <label>Interés anual (%):</label>
-      <div class="input-group">
-        <input type="number" id="interes" min="-99.99" step="0.01" required>
-        <select id="tipoTasa">
-          <option value="nominal_mensual" selected>Nominal anual / 12</option>
-          <option value="efectiva_anual">Efectiva anual</option>
-        </select>
-      </div>
-      <small id="tipoTasaHelp" class="field-help">Divide la tasa anual en 12 y capitaliza mensualmente.</small>
+      <input type="number" id="interes" min="-99.99" step="0.01" required>
+      <small class="field-help">Interés compuesto mensual: cada mes calcula sobre el saldo acumulado.</small>
     </div>
 
     <div class="form-group">
@@ -1030,7 +1024,7 @@ for (let dia = 1; dia <= totalDias; dia++) {
         {
           lineas: [1],
           tipo: 'fixed',
-          mensaje: 'Se introdujo una tasa diaria efectiva derivada de la tasa anual.'
+          mensaje: 'Se introdujo una tasa diaria equivalente derivada de la tasa anual.'
         },
         {
           lineas: [5],
@@ -1043,7 +1037,7 @@ for (let dia = 1; dia <= totalDias; dia++) {
           mensaje: 'Para meses, diasEntreAportes valía 30,4167. Un día entero casi nunca tiene módulo cero con ese decimal.'
         }
       ],
-      problema: 'La tasa diaria efectiva estaba mejor calculada, pero el interés se aplicaba antes del aporte. Además, comprobar d % 30,4167 = 0 con días enteros casi nunca se cumplía, por lo que los aportes mensuales podían omitirse.',
+      problema: 'La tasa diaria equivalente estaba mejor calculada, pero el interés se aplicaba antes del aporte. Además, comprobar d % 30,4167 = 0 con días enteros casi nunca se cumplía, por lo que los aportes mensuales podían omitirse.',
       cambio: 'React y Vite se reemplazaron por un solo index.html con CSS y JavaScript. Se incorporaron Chart.js, moneda CLP, vistas por período, tabla y paginación.',
       resultado: 'La aplicación quedó lista para abrirse o publicarse directamente, aunque el orden del cálculo y algunos aportes periódicos todavía necesitaban ajustes.'
     },
@@ -1183,30 +1177,17 @@ datosActuales.push({
       resultado: 'Fue la primera página estática final presentada, pero todavía calculaba meses aproximados y duplicaba el primer aporte diario.'
     },
     v6: {
-      titulo: 'v6 — Calendario y tasas explícitas',
+      titulo: 'v6 — Interés compuesto con calendario',
       estado: 'Versión final actual · julio de 2026',
-      formula: 'i_m = T_nominal / (12 × 100)\nt_d,m = (1 + i_m)^(1 / N_m) − 1\nAlternativa efectiva: t_d = (1 + T_efectiva / 100)^(1 / D_y) − 1\nM_d = (M_d₋₁ + A_d) × (1 + t_d); M_0 = C',
+      formula: 'i_m = T_anual / (12 × 100)\nM_m = (M_m₋₁ + A_m) × (1 + i_m)\nt_d,m = (1 + i_m)^(1 / N_m) − 1 para mostrar el avance diario',
       latex: String.raw`\begin{aligned}
-        i_m &= \dfrac{T_{\mathrm{nominal}}}{12 \cdot 100}\\
-        D_y &=
-        \begin{cases}
-          366 & \text{si el año } y \text{ es bisiesto}\\
-          365 & \text{en otro caso}
-        \end{cases}\\
-        t_d &=
-        \begin{cases}
-          (1+i_m)^{\frac{1}{N_m}}-1 & \text{para tasa nominal mensual}\\
-          \left(1+\dfrac{T_{\mathrm{efectiva}}}{100}\right)^{\frac{1}{D_y}}-1
-            & \text{para tasa efectiva anual}
-        \end{cases}\\
-        A_d &=
-        \begin{cases}
-          A & \text{si la fecha } d \text{ coincide con el aporte programado}\\
-          0 & \text{en otro caso}
-        \end{cases}\\
-        M_d &= (M_{d-1}+A_d)(1+t_d), \qquad M_0=C
+        i_m &= \dfrac{T_{\mathrm{anual}}}{12 \cdot 100}\\
+        M_m &= (M_{m-1}+A_m)(1+i_m)\\
+        t_{d,m} &= (1+i_m)^{\frac{1}{N_m}}-1\\
+        I_d &= (M_{d-1}+A_d)t_{d,m}\\
+        M_d &= M_{d-1}+A_d+I_d, \qquad M_0=C
       \end{aligned}`,
-      codigo: String.raw`function obtenerTasaDiariaNominalMensual(interesAnual, diasDelPeriodo) {
+      codigo: String.raw`function obtenerTasaDiariaCompuesta(interesAnual, diasDelPeriodo) {
   const tasaMensual = interesAnual / 100 / 12;
   return Math.pow(1 + tasaMensual, 1 / diasDelPeriodo) - 1;
 }
@@ -1214,6 +1195,9 @@ datosActuales.push({
 let monto = montoInicial;
 let numeroAporte = 1;
 let proximaFecha = obtenerProximaFechaAporte(fechaInicio, frecuencia, numeroAporte);
+let numeroPeriodoTasa = 1;
+let inicioPeriodoTasa = fechaInicio;
+let finPeriodoTasa = sumarMesesCalendario(fechaInicio, numeroPeriodoTasa);
 
 for (let dia = 1; dia <= totalDias; dia++) {
   const fechaActual = sumarDiasUTC(fechaInicio, dia);
@@ -1223,18 +1207,13 @@ for (let dia = 1; dia <= totalDias; dia++) {
   }
 
   const fechaDevengo = sumarDiasUTC(fechaActual, -1);
-  let tasaDiaria;
-  if (tipoTasa === 'nominal_mensual') {
-    while (fechaDevengo >= finPeriodoTasa) {
-      inicioPeriodoTasa = finPeriodoTasa;
-      finPeriodoTasa = sumarMesesCalendario(fechaInicio, ++numeroPeriodoTasa);
-    }
-    const diasDelPeriodo = diferenciaEnDias(inicioPeriodoTasa, finPeriodoTasa);
-    tasaDiaria = obtenerTasaDiariaNominalMensual(interesAnual, diasDelPeriodo);
-  } else {
-    tasaDiaria = obtenerTasaDiariaEfectiva(interesAnual, fechaDevengo);
+  while (fechaDevengo >= finPeriodoTasa) {
+    inicioPeriodoTasa = finPeriodoTasa;
+    numeroPeriodoTasa++;
+    finPeriodoTasa = sumarMesesCalendario(fechaInicio, numeroPeriodoTasa);
   }
-
+  const diasDelPeriodo = diferenciaEnDias(inicioPeriodoTasa, finPeriodoTasa);
+  const tasaDiaria = obtenerTasaDiariaCompuesta(interesAnual, diasDelPeriodo);
   const interesGenerado = monto * tasaDiaria;
   monto += interesGenerado;
   resultadosDiarios.push({ fecha: fechaActual, valor: monto, interes: interesGenerado });
@@ -1243,37 +1222,32 @@ for (let dia = 1; dia <= totalDias; dia++) {
         {
           lineas: [1, 2, 3],
           tipo: 'fixed',
-          mensaje: 'La tasa nominal anual se divide en 12 y cada mes completo aplica exactamente esa tasa mensual.'
+          mensaje: 'La tasa anual se divide en 12 y se convierte en una tasa diaria equivalente para que cada mes capitalice exactamente T/12.'
         },
         {
-          lineas: [6, 7, 8],
+          lineas: [6],
           tipo: 'fixed',
-          mensaje: 'El saldo comienza solo con el capital y el primer aporte se programa para la primera fecha futura.'
+          mensaje: 'monto conserva el capital más todos los intereses anteriores; nunca vuelve al capital inicial.'
         },
         {
-          lineas: [11, 12, 13, 14],
+          lineas: [14, 15, 16, 17],
           tipo: 'fixed',
           mensaje: 'El aporte se ejecuta una sola vez cuando coincide con su fecha programada.'
         },
         {
-          lineas: [19, 20, 21, 22, 23, 24, 25],
+          lineas: [20, 21, 22, 23, 24, 25, 26, 27],
           tipo: 'fixed',
-          mensaje: 'La tasa nominal mensual se distribuye entre los días reales de cada mes de inversión.'
+          mensaje: 'La tasa mensual se distribuye entre los días reales del período, conservando la capitalización mensual.'
         },
         {
-          lineas: [26, 27, 28],
+          lineas: [28, 29, 30],
           tipo: 'fixed',
-          mensaje: 'La tasa efectiva anual anterior permanece disponible como alternativa explícita.'
-        },
-        {
-          lineas: [30, 31, 32],
-          tipo: 'fixed',
-          mensaje: 'El interés generado se guarda por separado para mostrarlo en cada período.'
+          mensaje: 'Aquí ocurre el interés compuesto: el interés se calcula sobre monto, que ya contiene los intereses ganados anteriormente.'
         }
       ],
-      problema: 'v5 duplicaba el primer aporte diario y aproximaba cada mes como 30,4167 días. La primera implementación de v6 corrigió esos problemas, pero asumía una tasa efectiva anual sin explicar que era distinta de una nominal anual dividida en 12.',
-      cambio: 'Se incorporaron fechas reales, se eliminó el aporte duplicado y se agregó un selector de tipo de tasa. La nominal anual con capitalización mensual quedó predeterminada, la efectiva anual sigue disponible y la tabla muestra el interés ganado en cada período.',
-      resultado: 'Con $100.000.000, 5% nominal anual y sin aportes, el primer mes gana $416.667 y el año termina en $105.116.190. Con 5% efectivo anual, termina exactamente en $105.000.000.'
+      problema: 'Tener más de una modalidad de tasa hacía confuso el objetivo de la calculadora: aplicar interés compuesto mensual sobre el saldo acumulado.',
+      cambio: 'Se dejó un único cálculo compuesto mensual. Cada mes aplica T/12 sobre el capital más todos los intereses y aportes acumulados.',
+      resultado: 'Con $100.000.000 al 5% anual, el primer mes gana $416.667, el segundo aproximadamente $418.403 y el año termina cerca de $105.116.190.'
     }
   };
 
@@ -1428,7 +1402,7 @@ for (let dia = 1; dia <= totalDias; dia++) {
             </div>
             <div>
               <span class="preview-field-label">Interés anual (%)</span>
-              <div class="preview-fake-input">${opciones.conTipoTasa ? '5 · Nominal anual / 12' : '5'}</div>
+              <div class="preview-fake-input">${opciones.interesCompuesto ? '5 · Compuesto mensual' : '5'}</div>
             </div>
             <div>
               <span class="preview-field-label">Plazo de inversión</span>
@@ -1476,9 +1450,9 @@ for (let dia = 1; dia <= totalDias; dia++) {
       { esFinal: true, sinIconos: true, periodoCero: true }
     ),
     v6: () => crearVistaEstatica(
-      'v6-calendario-tasas',
-      'Estado actual: fechas reales, aportes sin duplicación, tasa nominal o efectiva e interés visible por período.',
-      { esFinal: true, sinIconos: true, periodoCero: true, conFechaInicio: true, conTipoTasa: true }
+      'v6-interes-compuesto',
+      'Estado actual: interés sobre interés, fechas reales, aportes sin duplicación e interés visible por período.',
+      { esFinal: true, sinIconos: true, periodoCero: true, conFechaInicio: true, interesCompuesto: true }
     )
   };
 
@@ -1572,18 +1546,6 @@ for (let dia = 1; dia <= totalDias; dia++) {
     fechaInicioInput.value = `${año}-${mes}-${dia}`;
   }
 
-  const tipoTasaSelect = document.getElementById('tipoTasa');
-  const tipoTasaHelp = document.getElementById('tipoTasaHelp');
-
-  function actualizarAyudaTipoTasa() {
-    tipoTasaHelp.textContent = tipoTasaSelect.value === 'nominal_mensual'
-      ? 'Divide la tasa anual en 12 y capitaliza mensualmente.'
-      : 'Conserva exactamente la tasa indicada al completar un año calendario.';
-  }
-
-  tipoTasaSelect.addEventListener('change', actualizarAyudaTipoTasa);
-  actualizarAyudaTipoTasa();
-
   function crearFechaUTC(valor) {
     const partes = valor.split('-').map(Number);
     if (partes.length !== 3 || partes.some(parte => !Number.isInteger(parte))) {
@@ -1667,16 +1629,7 @@ for (let dia = 1; dia <= totalDias; dia++) {
     }
   }
 
-  function esAñoBisiesto(año) {
-    return año % 4 === 0 && (año % 100 !== 0 || año % 400 === 0);
-  }
-
-  function obtenerTasaDiariaEfectiva(interesAnual, fecha) {
-    const diasDelAño = esAñoBisiesto(fecha.getUTCFullYear()) ? 366 : 365;
-    return Math.pow(1 + interesAnual / 100, 1 / diasDelAño) - 1;
-  }
-
-  function obtenerTasaDiariaNominalMensual(interesAnual, diasDelPeriodo) {
+  function obtenerTasaDiariaCompuesta(interesAnual, diasDelPeriodo) {
     const tasaMensual = interesAnual / 100 / 12;
     return Math.pow(1 + tasaMensual, 1 / diasDelPeriodo) - 1;
   }
@@ -1689,7 +1642,6 @@ for (let dia = 1; dia <= totalDias; dia++) {
       plazo,
       unidadPlazo,
       frecuenciaIngreso,
-      tipoTasa,
       fechaInicio
     } = configuracion;
 
@@ -1724,21 +1676,13 @@ for (let dia = 1; dia <= totalDias; dia++) {
 
       // La tasa corresponde al día que comienza el intervalo de devengo.
       const fechaDevengo = sumarDiasUTC(fechaActual, -1);
-      let tasaDiaria;
-
-      if (tipoTasa === 'nominal_mensual') {
-        while (fechaDevengo.getTime() >= finPeriodoTasa.getTime()) {
-          inicioPeriodoTasa = finPeriodoTasa;
-          numeroPeriodoTasa++;
-          finPeriodoTasa = sumarMesesCalendario(fechaInicio, numeroPeriodoTasa);
-        }
-        const diasDelPeriodo = diferenciaEnDias(inicioPeriodoTasa, finPeriodoTasa);
-        tasaDiaria = obtenerTasaDiariaNominalMensual(interesAnual, diasDelPeriodo);
-      } else if (tipoTasa === 'efectiva_anual') {
-        tasaDiaria = obtenerTasaDiariaEfectiva(interesAnual, fechaDevengo);
-      } else {
-        throw new Error('El tipo de tasa no es válido.');
+      while (fechaDevengo.getTime() >= finPeriodoTasa.getTime()) {
+        inicioPeriodoTasa = finPeriodoTasa;
+        numeroPeriodoTasa++;
+        finPeriodoTasa = sumarMesesCalendario(fechaInicio, numeroPeriodoTasa);
       }
+      const diasDelPeriodo = diferenciaEnDias(inicioPeriodoTasa, finPeriodoTasa);
+      const tasaDiaria = obtenerTasaDiariaCompuesta(interesAnual, diasDelPeriodo);
 
       const interesGenerado = monto * tasaDiaria;
       monto += interesGenerado;
@@ -1760,8 +1704,7 @@ for (let dia = 1; dia <= totalDias; dia++) {
       fechaTermino: fechaAISO(fechaTermino),
       montoInicial,
       unidadPlazo,
-      frecuenciaIngreso,
-      tipoTasa
+      frecuenciaIngreso
     };
   }
 
@@ -1775,7 +1718,6 @@ for (let dia = 1; dia <= totalDias; dia++) {
       plazo: Number(document.getElementById('plazo').value),
       unidadPlazo: document.getElementById('unidadPlazo').value,
       frecuenciaIngreso: document.getElementById('frecuenciaIngreso').value,
-      tipoTasa: document.getElementById('tipoTasa').value,
       fechaInicio: crearFechaUTC(document.getElementById('fechaInicio').value)
     };
 
