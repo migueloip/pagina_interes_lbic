@@ -198,9 +198,30 @@
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
-      margin-bottom: 9px;
       color: #5b6b79;
       font-size: 12px;
+    }
+    .version-code-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 9px;
+    }
+    .download-code-image {
+      width: auto;
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border: 1px solid #0953b4;
+      background: #0953b4;
+      font-size: 12px;
+    }
+    .download-code-image:hover {
+      background: #073f88;
+    }
+    .download-code-image:disabled {
+      opacity: 0.65;
+      cursor: wait;
     }
     .code-legend-item::before {
       display: inline-block;
@@ -749,6 +770,13 @@
         display: block;
         margin-top: 3px;
       }
+      .version-code-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .download-code-image {
+        width: 100%;
+      }
       .preview-v1-grid,
       .preview-fields {
         grid-template-columns: 1fr;
@@ -816,9 +844,12 @@ M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
       <details class="version-code">
         <summary id="versionCodeTitle">Ver código del cálculo de v6</summary>
         <div class="version-code-content">
-          <div class="code-legend" aria-label="Leyenda del código">
-            <span class="code-legend-item problem">Línea problemática</span>
-            <span class="code-legend-item fixed">Línea corregida</span>
+          <div class="version-code-toolbar">
+            <div class="code-legend" aria-label="Leyenda del código">
+              <span class="code-legend-item problem">Línea problemática</span>
+              <span class="code-legend-item fixed">Línea corregida</span>
+            </div>
+            <button type="button" id="downloadCodeImage" class="download-code-image">Descargar como imagen</button>
           </div>
           <pre class="version-code-block"><code id="versionCode"></code></pre>
           <ul id="versionCodeNotes" class="version-code-notes"></ul>
@@ -1497,6 +1528,187 @@ for (let dia = 1; dia <= totalDias; dia++) {
     document.getElementById('versionCodeNotes').innerHTML = notasHTML;
   }
 
+  function dividirTextoCanvas(contexto, texto, anchoMaximo) {
+    const palabras = texto.split(' ');
+    const lineas = [];
+    let lineaActual = '';
+
+    palabras.forEach(palabra => {
+      const candidata = lineaActual ? `${lineaActual} ${palabra}` : palabra;
+      if (lineaActual && contexto.measureText(candidata).width > anchoMaximo) {
+        lineas.push(lineaActual);
+        lineaActual = palabra;
+      } else {
+        lineaActual = candidata;
+      }
+    });
+
+    if (lineaActual) lineas.push(lineaActual);
+    return lineas;
+  }
+
+  function trazarRectanguloRedondeado(contexto, x, y, ancho, alto, radio) {
+    contexto.beginPath();
+    contexto.moveTo(x + radio, y);
+    contexto.lineTo(x + ancho - radio, y);
+    contexto.quadraticCurveTo(x + ancho, y, x + ancho, y + radio);
+    contexto.lineTo(x + ancho, y + alto - radio);
+    contexto.quadraticCurveTo(x + ancho, y + alto, x + ancho - radio, y + alto);
+    contexto.lineTo(x + radio, y + alto);
+    contexto.quadraticCurveTo(x, y + alto, x, y + alto - radio);
+    contexto.lineTo(x, y + radio);
+    contexto.quadraticCurveTo(x, y, x + radio, y);
+    contexto.closePath();
+  }
+
+  function descargarCodigoComoImagen(versionId) {
+    const version = historialVersiones[versionId];
+    const boton = document.getElementById('downloadCodeImage');
+    if (!version || !boton) return;
+
+    const textoOriginal = boton.textContent;
+    boton.disabled = true;
+    boton.textContent = 'Generando imagen…';
+
+    try {
+      const lineasCodigo = version.codigo.split('\n');
+      const fuenteCodigo = "14px Consolas, 'Courier New', monospace";
+      const fuenteNota = "13px 'Segoe UI', Tahoma, sans-serif";
+      const lienzoMedicion = document.createElement('canvas');
+      const medicion = lienzoMedicion.getContext('2d');
+      medicion.font = fuenteCodigo;
+
+      const margen = 28;
+      const anchoNumeros = 46;
+      const anchoLineaMayor = Math.max(...lineasCodigo.map(linea => medicion.measureText(linea).width));
+      const ancho = Math.ceil(Math.max(760, margen * 2 + anchoNumeros + anchoLineaMayor + 24));
+      const altoLineaCodigo = 22;
+      const rellenoCodigo = 14;
+      const codigoY = 82;
+      const altoCodigo = rellenoCodigo * 2 + lineasCodigo.length * altoLineaCodigo;
+
+      medicion.font = fuenteNota;
+      const notasPreparadas = version.marcasCodigo.map(marca => {
+        const etiqueta = marca.tipo === 'problem' ? 'Fallo' : 'Corrección';
+        const lineas = marca.lineas.length === 1 ? 'Línea' : 'Líneas';
+        const texto = `${etiqueta} · ${lineas} ${marca.lineas.join(', ')}: ${marca.mensaje}`;
+        return {
+          tipo: marca.tipo,
+          lineas: dividirTextoCanvas(medicion, texto, ancho - margen * 2 - 18)
+        };
+      });
+
+      const altoNotas = notasPreparadas.reduce((total, nota) => total + nota.lineas.length * 19 + 10, 0);
+      const notasY = codigoY + altoCodigo + 28;
+      const alto = Math.ceil(notasY + 28 + altoNotas + margen);
+      const escala = 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = ancho * escala;
+      canvas.height = alto * escala;
+      const contexto = canvas.getContext('2d');
+      contexto.scale(escala, escala);
+
+      contexto.fillStyle = '#f8fafc';
+      contexto.fillRect(0, 0, ancho, alto);
+      contexto.fillStyle = '#173f63';
+      contexto.font = "700 20px 'Segoe UI', Tahoma, sans-serif";
+      contexto.textBaseline = 'middle';
+      contexto.fillText(`Código del cálculo · ${versionId}`, margen, 29);
+
+      contexto.font = "12px 'Segoe UI', Tahoma, sans-serif";
+      contexto.fillStyle = '#ef4444';
+      contexto.fillRect(margen, 51, 10, 10);
+      contexto.fillStyle = '#5b6b79';
+      contexto.fillText('Línea problemática', margen + 16, 56);
+      contexto.fillStyle = '#22c55e';
+      contexto.fillRect(margen + 150, 51, 10, 10);
+      contexto.fillStyle = '#5b6b79';
+      contexto.fillText('Línea corregida', margen + 166, 56);
+
+      const codigoX = margen;
+      const anchoCodigo = ancho - margen * 2;
+      trazarRectanguloRedondeado(contexto, codigoX, codigoY, anchoCodigo, altoCodigo, 7);
+      contexto.fillStyle = '#111827';
+      contexto.fill();
+
+      const marcasPorLinea = new Map();
+      version.marcasCodigo.forEach(marca => {
+        marca.lineas.forEach(linea => marcasPorLinea.set(linea, marca));
+      });
+
+      contexto.font = fuenteCodigo;
+      lineasCodigo.forEach((linea, indice) => {
+        const numeroLinea = indice + 1;
+        const marca = marcasPorLinea.get(numeroLinea);
+        const lineaY = codigoY + rellenoCodigo + indice * altoLineaCodigo;
+
+        if (marca) {
+          contexto.fillStyle = marca.tipo === 'problem'
+            ? 'rgba(239, 68, 68, 0.22)'
+            : 'rgba(34, 197, 94, 0.20)';
+          contexto.fillRect(codigoX, lineaY, anchoCodigo, altoLineaCodigo);
+          contexto.fillStyle = marca.tipo === 'problem' ? '#ef4444' : '#22c55e';
+          contexto.fillRect(codigoX, lineaY, 3, altoLineaCodigo);
+        }
+
+        contexto.textAlign = 'right';
+        contexto.fillStyle = marca
+          ? (marca.tipo === 'problem' ? '#fca5a5' : '#86efac')
+          : '#718096';
+        contexto.fillText(String(numeroLinea), codigoX + anchoNumeros - 9, lineaY + altoLineaCodigo / 2);
+        contexto.textAlign = 'left';
+        contexto.fillStyle = '#dbeafe';
+        contexto.fillText(linea, codigoX + anchoNumeros, lineaY + altoLineaCodigo / 2);
+      });
+
+      contexto.textBaseline = 'top';
+      contexto.font = "700 15px 'Segoe UI', Tahoma, sans-serif";
+      contexto.fillStyle = '#173f63';
+      contexto.fillText('Notas del cálculo', margen, notasY);
+
+      let notaY = notasY + 28;
+      contexto.font = fuenteNota;
+      notasPreparadas.forEach(nota => {
+        contexto.fillStyle = nota.tipo === 'problem' ? '#ef4444' : '#22c55e';
+        contexto.fillRect(margen, notaY + 4, 8, 8);
+        contexto.fillStyle = nota.tipo === 'problem' ? '#9f2525' : '#166534';
+        nota.lineas.forEach((linea, indice) => {
+          contexto.fillText(linea, margen + 18, notaY + indice * 19);
+        });
+        notaY += nota.lineas.length * 19 + 10;
+      });
+
+      canvas.toBlob(blob => {
+        if (!blob) {
+          boton.textContent = 'No se pudo generar';
+          window.setTimeout(() => {
+            boton.disabled = false;
+            boton.textContent = textoOriginal;
+          }, 1800);
+          return;
+        }
+
+        const enlace = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        enlace.href = url;
+        enlace.download = `codigo-calculo-${versionId}.png`;
+        document.body.appendChild(enlace);
+        enlace.click();
+        enlace.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        boton.disabled = false;
+        boton.textContent = textoOriginal;
+      }, 'image/png');
+    } catch (error) {
+      console.error('No fue posible generar la imagen del código:', error);
+      boton.textContent = 'No se pudo generar';
+      window.setTimeout(() => {
+        boton.disabled = false;
+        boton.textContent = textoOriginal;
+      }, 1800);
+    }
+  }
+
   function mostrarVersion(versionId, botonActivo) {
     const version = historialVersiones[versionId];
     const crearVista = vistasVersiones[versionId];
@@ -1515,6 +1727,9 @@ for (let dia = 1; dia <= totalDias; dia++) {
     document.getElementById('versionChange').textContent = version.cambio;
     document.getElementById('versionResult').textContent = version.resultado;
     renderizarCodigoVersion(version);
+    const botonDescarga = document.getElementById('downloadCodeImage');
+    botonDescarga.dataset.version = versionId;
+    botonDescarga.setAttribute('aria-label', `Descargar el código de ${versionId} como imagen PNG`);
     document.getElementById('versionPreview').innerHTML = crearVista();
     document.getElementById('versionDesignLabel').textContent = 'Reconstrucción basada en el historial de Git';
   }
@@ -1523,6 +1738,10 @@ for (let dia = 1; dia <= totalDias; dia++) {
     button.addEventListener('click', function() {
       mostrarVersion(this.dataset.version, this);
     });
+  });
+
+  document.getElementById('downloadCodeImage').addEventListener('click', function() {
+    descargarCodigoComoImagen(this.dataset.version);
   });
 
   mostrarVersion('v6', document.querySelector('.version-button[data-version="v6"]'));
