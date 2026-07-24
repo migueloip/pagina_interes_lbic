@@ -85,7 +85,7 @@
     }
     .version-selector {
       display: grid;
-      grid-template-columns: repeat(5, minmax(58px, 1fr));
+      grid-template-columns: repeat(6, minmax(58px, 1fr));
       gap: 8px;
       margin-bottom: 18px;
     }
@@ -407,6 +407,18 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
       margin-bottom: 25px;
     }
+    .calculator-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .calculator-heading h2 {
+      margin-bottom: 0;
+    }
     .form-group {
       margin-bottom: 15px;
     }
@@ -628,6 +640,10 @@
       .preview-canvas {
         padding: 12px;
       }
+      .calculator-heading {
+        align-items: flex-start;
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -653,31 +669,33 @@
       <button type="button" class="version-button" data-version="v2" aria-pressed="false">v2</button>
       <button type="button" class="version-button" data-version="v3" aria-pressed="false">v3</button>
       <button type="button" class="version-button" data-version="v4" aria-pressed="false">v4</button>
-      <button type="button" class="version-button active" data-version="v5" aria-pressed="true">v5</button>
+      <button type="button" class="version-button" data-version="v5" aria-pressed="false">v5</button>
+      <button type="button" class="version-button active" data-version="v6" aria-pressed="true">v6</button>
     </div>
 
     <article class="version-summary" aria-live="polite">
       <div class="version-summary-heading">
-        <h3 id="versionTitle">v5 — Presentación del punto de partida</h3>
+        <h3 id="versionTitle">v6 — Cálculo basado en calendario</h3>
         <span id="versionState" class="version-state">Versión final actual</span>
       </div>
       <div class="version-detail">
         <strong>Fórmula usada</strong>
-        <div id="versionFormula" class="version-formula">t_d = (1 + T_anual / 100)^(1 / 365) − 1
-M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
-        <small class="formula-legend">T = tasa · t = tasa convertida · M/B = saldo · A = aporte · C = capital · f = frecuencia · c = contador · V = valor mostrado</small>
+        <div id="versionFormula" class="version-formula">D_y = 366 si el año es bisiesto; 365 en otro caso
+t_d = (1 + T_anual / 100)^(1 / D_y) − 1
+M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
+        <small class="formula-legend">T = tasa · t = tasa convertida · M/B = saldo · A = aporte · C = capital · f = frecuencia · c = contador · V = valor mostrado · D = días del año</small>
       </div>
       <div class="version-detail">
-        <strong>Por qué fallaba o qué limitaba</strong>
-        <p id="versionProblem">La fórmula heredó el aporte diario adicional de v4 y aproxima todos los meses como intervalos fijos, en vez de usar fechas de calendario.</p>
+        <strong>Qué fallaba antes o qué limita esta versión</strong>
+        <p id="versionProblem">v5 agregaba un aporte diario antes del ciclo y aproximaba cada mes como 30,4167 días.</p>
       </div>
       <div class="version-detail">
         <strong>Qué cambió</strong>
-        <p id="versionChange">Se añadió el período 0 con el monto inicial. Después se simplificaron las pestañas, se cambiaron los botones a azul y se agregó el favicon.</p>
+        <p id="versionChange">Se eliminó el aporte inicial duplicado, se agregó una fecha de inicio y los aportes mensuales o anuales se programan mediante fechas reales. Los años bisiestos usan 366 días.</p>
       </div>
       <div class="version-detail">
         <strong>Resultado</strong>
-        <p id="versionResult">Es la página estática actual: calcula en CLP y presenta los resultados por día, semana, mes o año mediante gráfico y tabla.</p>
+        <p id="versionResult">La proyección comienza únicamente con el capital, realiza el primer aporte al completar su frecuencia y muestra fechas reales en gráficos y tablas.</p>
       </div>
     </article>
 
@@ -691,15 +709,25 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
   </section>
 
   <form id="calcForm">
+    <div class="calculator-heading">
+      <h2>Calculadora actual</h2>
+      <span class="version-state">v6 · calendario real</span>
+    </div>
+
+    <div class="form-group">
+      <label>Fecha de inicio:</label>
+      <input type="date" id="fechaInicio" required>
+    </div>
+
     <div class="form-group">
       <label>Monto inicial (CLP):</label>
-      <input type="number" id="monto" required>
+      <input type="number" id="monto" min="0" step="any" required>
     </div>
 
     <div class="form-group">
       <label>Ingreso periódico (CLP):</label>
       <div class="input-group">
-        <input type="number" id="ingreso" step="any" required>
+        <input type="number" id="ingreso" min="0" step="any" required>
         <select id="frecuenciaIngreso">
           <option value="diario">Diario</option>
           <option value="semanal">Semanal</option>
@@ -711,13 +739,13 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
 
     <div class="form-group">
       <label>Interés anual (%):</label>
-      <input type="number" id="interes" step="0.01" required>
+      <input type="number" id="interes" min="-99.99" step="0.01" required>
     </div>
 
     <div class="form-group">
       <label>Plazo de inversión:</label>
       <div class="input-group">
-        <input type="number" id="plazo" required>
+        <input type="number" id="plazo" min="1" step="1" required>
         <select id="unidadPlazo">
           <option value="dias">Días</option>
           <option value="semanas">Semanas</option>
@@ -760,6 +788,7 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
         <thead>
           <tr>
             <th>Período</th>
+            <th>Fecha</th>
             <th>Total acumulado (CLP)</th>
           </tr>
         </thead>
@@ -794,10 +823,9 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
   let datosActuales = [];
   let tipoVistaActual = 'diario';
   
-  // Constantes de conversión
-  const DIAS_POR_ANO = 365;
-  const DIAS_POR_MES = 30.4167; // Promedio de días por mes (365/12)
+  // Constantes de calendario
   const DIAS_POR_SEMANA = 7;
+  const MILISEGUNDOS_POR_DIA = 24 * 60 * 60 * 1000;
 
   const historialVersiones = {
     v1: {
@@ -872,7 +900,7 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
     },
     v5: {
       titulo: 'v5 — Presentación del punto de partida',
-      estado: 'Versión final actual',
+      estado: 'Versión anterior',
       formula: 't_d = (1 + T_anual / 100)^(1 / 365) − 1\nM_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)',
       latex: String.raw`\begin{aligned}
         t_d &= \left(1+\dfrac{T_{\mathrm{anual}}}{100}\right)^{\frac{1}{365}}-1\\
@@ -881,11 +909,33 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
       \end{aligned}`,
       problema: 'El cálculo no cambió respecto de v4: conserva el aporte diario adicional y usa intervalos promedio en vez de fechas reales. El período 0 mejora la visualización, pero no corrige esas limitaciones internas.',
       cambio: 'Se añadió el período 0 con el monto inicial. Después se simplificaron las pestañas, se cambiaron los botones a azul y se agregó el favicon.',
-      resultado: 'Es la página estática actual: calcula en CLP y presenta los resultados por día, semana, mes o año mediante gráfico y tabla.'
+      resultado: 'Fue la primera página estática final presentada, pero todavía calculaba meses aproximados y duplicaba el primer aporte diario.'
+    },
+    v6: {
+      titulo: 'v6 — Cálculo basado en calendario',
+      estado: 'Versión final actual',
+      formula: 'D_y = 366 si el año es bisiesto; 365 en otro caso\nt_d = (1 + T_anual / 100)^(1 / D_y) − 1\nM_d = (M_d₋₁ + A_d) × (1 + t_d); M_0 = C',
+      latex: String.raw`\begin{aligned}
+        D_y &=
+        \begin{cases}
+          366 & \text{si el año } y \text{ es bisiesto}\\
+          365 & \text{en otro caso}
+        \end{cases}\\
+        t_d &= \left(1+\dfrac{T_{\mathrm{anual}}}{100}\right)^{\frac{1}{D_y}}-1\\
+        A_d &=
+        \begin{cases}
+          A & \text{si la fecha } d \text{ coincide con el aporte programado}\\
+          0 & \text{en otro caso}
+        \end{cases}\\
+        M_d &= (M_{d-1}+A_d)(1+t_d), \qquad M_0=C
+      \end{aligned}`,
+      problema: 'v5 agregaba un aporte diario antes del ciclo y aproximaba cada mes como 30,4167 días. Eso producía un aporte extra y desplazaba las fechas mensuales.',
+      cambio: 'Se eliminó el aporte inicial duplicado, se agregó una fecha de inicio y los aportes mensuales o anuales se programan mediante fechas reales. Los años bisiestos usan 366 días.',
+      resultado: 'La proyección comienza únicamente con el capital, realiza el primer aporte al completar su frecuencia y muestra fechas reales en gráficos y tablas.'
     }
   };
 
-  let formulaSeleccionada = historialVersiones.v5;
+  let formulaSeleccionada = historialVersiones.v6;
   let turnoFormula = 0;
   let colaFormula = Promise.resolve();
 
@@ -1020,6 +1070,12 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
         </div>
         <div class="preview-card">
           <div class="preview-fields">
+            ${opciones.conFechaInicio ? `
+            <div>
+              <span class="preview-field-label">Fecha de inicio</span>
+              <div class="preview-fake-input">24-07-2026</div>
+            </div>
+            ` : ''}
             <div>
               <span class="preview-field-label">Monto inicial (CLP)</span>
               <div class="preview-fake-input">1.000.000</div>
@@ -1074,8 +1130,13 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
     ),
     v5: () => crearVistaEstatica(
       'v5-final',
-      'Diseño final actual: botones azules, pestañas sin emojis y gráfico iniciado en el período 0.',
+      'Botones azules, pestañas sin emojis y gráfico iniciado en el período 0.',
       { esFinal: true, sinIconos: true, periodoCero: true }
+    ),
+    v6: () => crearVistaEstatica(
+      'v6-calendario',
+      'La nueva fecha de inicio permite programar aportes por días reales y corregir los meses aproximados.',
+      { esFinal: true, sinIconos: true, periodoCero: true, conFechaInicio: true }
     )
   };
 
@@ -1106,7 +1167,7 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
     });
   });
 
-  mostrarVersion('v5', document.querySelector('.version-button[data-version="v5"]'));
+  mostrarVersion('v6', document.querySelector('.version-button[data-version="v6"]'));
   
   // Event listeners para los controles de paginación - Definidos primero
   document.getElementById('btnAnterior').addEventListener('click', function() {
@@ -1123,95 +1184,207 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
     }
   });
   
-  document.getElementById('calcForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+  const fechaInicioInput = document.getElementById('fechaInicio');
+  if (!fechaInicioInput.value) {
+    const hoy = new Date();
+    const año = hoy.getFullYear();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    fechaInicioInput.value = `${año}-${mes}-${dia}`;
+  }
 
-    const montoInicial = parseFloat(document.getElementById('monto').value);
-    const ingresoPeriodico = parseFloat(document.getElementById('ingreso').value);
-    const interesAnual = parseFloat(document.getElementById('interes').value);
-    const plazo = parseFloat(document.getElementById('plazo').value);
-    const unidadPlazo = document.getElementById('unidadPlazo').value;
-    const frecuenciaIngreso = document.getElementById('frecuenciaIngreso').value;
-    
-    // Convertir el plazo a días
-    let totalDias = convertirADias(plazo, unidadPlazo);
-    
-    // Calcular el interés diario (tasa efectiva diaria)
-    const tasaDiaria = Math.pow(1 + interesAnual / 100, 1 / DIAS_POR_ANO) - 1;
-    
-    // Determinar la frecuencia de aporte en días
-    const diasEntreAportes = obtenerDiasEntreAportes(frecuenciaIngreso);
-    
-    // Realizar cálculos para todos los días
-    let resultadosDiarios = [];
-    let monto = montoInicial;
-    let diasDesdeUltimoAporte = 0;
-    
-    // Aplicar primer aporte inicial junto con el monto inicial si la frecuencia es diaria
-    if (frecuenciaIngreso === 'diario') {
-      monto += ingresoPeriodico;
+  function crearFechaUTC(valor) {
+    const partes = valor.split('-').map(Number);
+    if (partes.length !== 3 || partes.some(parte => !Number.isInteger(parte))) {
+      throw new Error('La fecha de inicio no es válida.');
     }
-    
+
+    const [año, mes, dia] = partes;
+    const fecha = new Date(Date.UTC(año, mes - 1, dia));
+    if (
+      fecha.getUTCFullYear() !== año ||
+      fecha.getUTCMonth() !== mes - 1 ||
+      fecha.getUTCDate() !== dia
+    ) {
+      throw new Error('La fecha de inicio no es válida.');
+    }
+    return fecha;
+  }
+
+  function fechaAISO(fecha) {
+    return [
+      fecha.getUTCFullYear(),
+      String(fecha.getUTCMonth() + 1).padStart(2, '0'),
+      String(fecha.getUTCDate()).padStart(2, '0')
+    ].join('-');
+  }
+
+  function formatearFecha(valor) {
+    const fecha = typeof valor === 'string' ? crearFechaUTC(valor) : valor;
+    return new Intl.DateTimeFormat('es-CL', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'UTC'
+    }).format(fecha);
+  }
+
+  function sumarDiasUTC(fechaBase, cantidad) {
+    const fecha = new Date(fechaBase.getTime());
+    fecha.setUTCDate(fecha.getUTCDate() + cantidad);
+    return fecha;
+  }
+
+  function sumarMesesCalendario(fechaBase, cantidad) {
+    const mesAbsoluto = fechaBase.getUTCFullYear() * 12 + fechaBase.getUTCMonth() + cantidad;
+    const añoDestino = Math.floor(mesAbsoluto / 12);
+    const mesDestino = mesAbsoluto % 12;
+    const ultimoDiaDestino = new Date(Date.UTC(añoDestino, mesDestino + 1, 0)).getUTCDate();
+    const diaDestino = Math.min(fechaBase.getUTCDate(), ultimoDiaDestino);
+    return new Date(Date.UTC(añoDestino, mesDestino, diaDestino));
+  }
+
+  function sumarAñosCalendario(fechaBase, cantidad) {
+    const añoDestino = fechaBase.getUTCFullYear() + cantidad;
+    const mesDestino = fechaBase.getUTCMonth();
+    const ultimoDiaDestino = new Date(Date.UTC(añoDestino, mesDestino + 1, 0)).getUTCDate();
+    const diaDestino = Math.min(fechaBase.getUTCDate(), ultimoDiaDestino);
+    return new Date(Date.UTC(añoDestino, mesDestino, diaDestino));
+  }
+
+  function diferenciaEnDias(fechaInicio, fechaTermino) {
+    return Math.round((fechaTermino.getTime() - fechaInicio.getTime()) / MILISEGUNDOS_POR_DIA);
+  }
+
+  function obtenerFechaTermino(fechaInicio, plazo, unidad) {
+    switch (unidad) {
+      case 'dias': return sumarDiasUTC(fechaInicio, plazo);
+      case 'semanas': return sumarDiasUTC(fechaInicio, plazo * DIAS_POR_SEMANA);
+      case 'meses': return sumarMesesCalendario(fechaInicio, plazo);
+      case 'anos': return sumarAñosCalendario(fechaInicio, plazo);
+      default: throw new Error('La unidad del plazo no es válida.');
+    }
+  }
+
+  function obtenerProximaFechaAporte(fechaInicio, frecuencia, numeroAporte) {
+    switch (frecuencia) {
+      case 'diario': return sumarDiasUTC(fechaInicio, numeroAporte);
+      case 'semanal': return sumarDiasUTC(fechaInicio, numeroAporte * DIAS_POR_SEMANA);
+      case 'mensual': return sumarMesesCalendario(fechaInicio, numeroAporte);
+      case 'anual': return sumarAñosCalendario(fechaInicio, numeroAporte);
+      default: throw new Error('La frecuencia de aporte no es válida.');
+    }
+  }
+
+  function esAñoBisiesto(año) {
+    return año % 4 === 0 && (año % 100 !== 0 || año % 400 === 0);
+  }
+
+  function obtenerTasaDiaria(interesAnual, fecha) {
+    const diasDelAño = esAñoBisiesto(fecha.getUTCFullYear()) ? 366 : 365;
+    return Math.pow(1 + interesAnual / 100, 1 / diasDelAño) - 1;
+  }
+
+  function calcularProyeccion(configuracion) {
+    const {
+      montoInicial,
+      ingresoPeriodico,
+      interesAnual,
+      plazo,
+      unidadPlazo,
+      frecuenciaIngreso,
+      fechaInicio
+    } = configuracion;
+
+    const fechaTermino = obtenerFechaTermino(fechaInicio, plazo, unidadPlazo);
+    const totalDias = diferenciaEnDias(fechaInicio, fechaTermino);
+    const resultadosDiarios = [];
+    let monto = montoInicial;
+    let numeroAporte = 1;
+    let proximaFechaAporte = obtenerProximaFechaAporte(
+      fechaInicio,
+      frecuenciaIngreso,
+      numeroAporte
+    );
+
     for (let dia = 1; dia <= totalDias; dia++) {
-      diasDesdeUltimoAporte++;
-      
-      // Añadir ingreso periódico si corresponde según la frecuencia
-      if (diasDesdeUltimoAporte >= diasEntreAportes) {
-        monto += ingresoPeriodico;
-        diasDesdeUltimoAporte = 0;
+      const fechaActual = sumarDiasUTC(fechaInicio, dia);
+      let aporte = 0;
+
+      if (fechaActual.getTime() === proximaFechaAporte.getTime()) {
+        aporte = ingresoPeriodico;
+        monto += aporte;
+        numeroAporte++;
+        proximaFechaAporte = obtenerProximaFechaAporte(
+          fechaInicio,
+          frecuenciaIngreso,
+          numeroAporte
+        );
       }
-      
-      // Aplicar interés diario
-      monto = monto * (1 + tasaDiaria);
-      
+
+      // La tasa corresponde al día que comienza el intervalo de devengo.
+      const fechaDevengo = sumarDiasUTC(fechaActual, -1);
+      const tasaDiaria = obtenerTasaDiaria(interesAnual, fechaDevengo);
+      monto *= 1 + tasaDiaria;
+
       resultadosDiarios.push({
-        dia: dia,
-        valor: monto
+        dia,
+        fecha: fechaAISO(fechaActual),
+        valor: monto,
+        aporte,
+        tasaDiaria
       });
     }
 
-    // Guardar resultados para usarlos al cambiar vista
-    window.resultadosCalculados = {
+    return {
       diarios: resultadosDiarios,
-      totalDias: totalDias,
-      unidadPlazo: unidadPlazo,
-      frecuenciaIngreso: frecuenciaIngreso
+      totalDias,
+      fechaInicio: fechaAISO(fechaInicio),
+      fechaTermino: fechaAISO(fechaTermino),
+      montoInicial,
+      unidadPlazo,
+      frecuenciaIngreso
     };
+  }
+
+  document.getElementById('calcForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const configuracion = {
+      montoInicial: parseFloat(document.getElementById('monto').value),
+      ingresoPeriodico: parseFloat(document.getElementById('ingreso').value),
+      interesAnual: parseFloat(document.getElementById('interes').value),
+      plazo: Number(document.getElementById('plazo').value),
+      unidadPlazo: document.getElementById('unidadPlazo').value,
+      frecuenciaIngreso: document.getElementById('frecuenciaIngreso').value,
+      fechaInicio: crearFechaUTC(document.getElementById('fechaInicio').value)
+    };
+
+    const numerosValidos = [
+      configuracion.montoInicial,
+      configuracion.ingresoPeriodico,
+      configuracion.interesAnual,
+      configuracion.plazo
+    ].every(Number.isFinite);
+
+    if (
+      !numerosValidos ||
+      configuracion.montoInicial < 0 ||
+      configuracion.ingresoPeriodico < 0 ||
+      configuracion.interesAnual <= -100 ||
+      !Number.isInteger(configuracion.plazo) ||
+      configuracion.plazo < 1
+    ) {
+      window.alert('Revisa los datos: el plazo debe ser un entero positivo y los montos no pueden ser negativos.');
+      return;
+    }
+
+    window.resultadosCalculados = calcularProyeccion(configuracion);
 
     // Mostrar vista diaria por defecto
     mostrarResultados('diario');
     document.getElementById('resultadoContainer').classList.remove('hidden');
   });
-
-  function convertirADias(cantidad, unidad) {
-    switch (unidad) {
-      case 'dias': return cantidad;
-      case 'semanas': return cantidad * DIAS_POR_SEMANA;
-      case 'meses': return cantidad * DIAS_POR_MES;
-      case 'anos': return cantidad * DIAS_POR_ANO;
-      default: return cantidad;
-    }
-  }
-  
-  function obtenerDiasEntreAportes(frecuencia) {
-    switch (frecuencia) {
-      case 'diario': return 1;
-      case 'semanal': return DIAS_POR_SEMANA;
-      case 'mensual': return DIAS_POR_MES;
-      case 'anual': return DIAS_POR_ANO;
-      default: return 1;
-    }
-  }
-  
-  function calcularIngresoPorDia(ingreso, frecuencia) {
-    switch (frecuencia) {
-      case 'diario': return ingreso;
-      case 'semanal': return ingreso / DIAS_POR_SEMANA;
-      case 'mensual': return ingreso / DIAS_POR_MES;
-      case 'anual': return ingreso / DIAS_POR_ANO;
-      default: return ingreso;
-    }
-  }
 
   // Agregar event listeners para los botones de vista
   document.querySelectorAll('.view-selector button').forEach(button => {
@@ -1254,7 +1427,7 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
     const tableThead = document.querySelector('#resultado thead tr');
     
     // Actualizar encabezado según vista
-    tableThead.innerHTML = `<th>${getNombrePeriodo(tipoVista)}</th><th>Total acumulado (CLP)</th>`;
+    tableThead.innerHTML = `<th>${getNombrePeriodo(tipoVista)}</th><th>Fecha</th><th>Total acumulado (CLP)</th>`;
     
     // Preparar datos según la vista seleccionada
     prepararDatosPorVista(tipoVista);
@@ -1268,64 +1441,69 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
 
   function prepararDatosPorVista(tipoVista) {
     const resultados = window.resultadosCalculados.diarios;
-    const montoInicial = parseFloat(document.getElementById('monto').value);
+    const montoInicial = window.resultadosCalculados.montoInicial;
+    const fechaInicio = crearFechaUTC(window.resultadosCalculados.fechaInicio);
+    const fechaTermino = crearFechaUTC(window.resultadosCalculados.fechaTermino);
     datosActuales = [];
     
     // Agregar período 0 con el monto inicial
     datosActuales.push({
       periodo: 0,
+      fecha: window.resultadosCalculados.fechaInicio,
+      fechaTexto: formatearFecha(fechaInicio),
       valor: montoInicial,
-      etiqueta: `${getNombrePeriodo(tipoVista)} 0`
+      etiqueta: `${getNombrePeriodo(tipoVista)} 0 · ${formatearFecha(fechaInicio)}`
     });
     
-    switch(tipoVista) {
-      case 'diario':
-        datosActuales = datosActuales.concat(resultados.map(item => ({
-          periodo: item.dia,
-          valor: item.valor,
-          etiqueta: `Día ${item.dia}`
-        })));
-        break;
-        
-      case 'semanal':
-        // Agrupar por semanas
-        for (let semana = 1; semana <= Math.ceil(resultados.length / DIAS_POR_SEMANA); semana++) {
-          const indiceDia = Math.min(semana * DIAS_POR_SEMANA - 1, resultados.length - 1);
-          datosActuales.push({
-            periodo: semana,
-            valor: resultados[indiceDia].valor,
-            etiqueta: `Semana ${semana}`
-          });
+    if (tipoVista === 'diario') {
+      datosActuales = datosActuales.concat(resultados.map(item => ({
+        periodo: item.dia,
+        fecha: item.fecha,
+        fechaTexto: formatearFecha(item.fecha),
+        valor: item.valor,
+        etiqueta: `Día ${item.dia} · ${formatearFecha(item.fecha)}`
+      })));
+    } else {
+      let periodo = 1;
+
+      while (true) {
+        let fechaObjetivo = obtenerFechaObjetivoVista(fechaInicio, tipoVista, periodo);
+        const esUltimoPeriodo = fechaObjetivo.getTime() >= fechaTermino.getTime();
+
+        if (esUltimoPeriodo) {
+          fechaObjetivo = fechaTermino;
         }
-        break;
-        
-      case 'mensual':
-        // Agrupar por meses
-        for (let mes = 1; mes <= Math.ceil(resultados.length / DIAS_POR_MES); mes++) {
-          const indiceDia = Math.min(Math.floor(mes * DIAS_POR_MES) - 1, resultados.length - 1);
-          datosActuales.push({
-            periodo: mes,
-            valor: resultados[indiceDia].valor,
-            etiqueta: `Mes ${mes}`
-          });
-        }
-        break;
-        
-      case 'anual':
-        // Agrupar por años
-        for (let año = 1; año <= Math.ceil(resultados.length / DIAS_POR_ANO); año++) {
-          const indiceDia = Math.min(Math.floor(año * DIAS_POR_ANO) - 1, resultados.length - 1);
-          datosActuales.push({
-            periodo: año,
-            valor: resultados[indiceDia].valor,
-            etiqueta: `Año ${año}`
-          });
-        }
-        break;
+
+        const indiceDia = Math.min(
+          diferenciaEnDias(fechaInicio, fechaObjetivo) - 1,
+          resultados.length - 1
+        );
+        const resultado = resultados[Math.max(0, indiceDia)];
+
+        datosActuales.push({
+          periodo,
+          fecha: resultado.fecha,
+          fechaTexto: formatearFecha(resultado.fecha),
+          valor: resultado.valor,
+          etiqueta: `${getNombrePeriodo(tipoVista)} ${periodo} · ${formatearFecha(resultado.fecha)}`
+        });
+
+        if (esUltimoPeriodo) break;
+        periodo++;
+      }
     }
     
     // Calcular total de páginas
     totalPaginas = Math.ceil(datosActuales.length / elementosPorPagina);
+  }
+
+  function obtenerFechaObjetivoVista(fechaInicio, tipoVista, periodo) {
+    switch (tipoVista) {
+      case 'semanal': return sumarDiasUTC(fechaInicio, periodo * DIAS_POR_SEMANA);
+      case 'mensual': return sumarMesesCalendario(fechaInicio, periodo);
+      case 'anual': return sumarAñosCalendario(fechaInicio, periodo);
+      default: throw new Error('El tipo de vista no es válido.');
+    }
   }
 
   function mostrarPaginaActual() {
@@ -1339,7 +1517,7 @@ M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</div>
     // Mostrar elementos de la página actual
     for (let i = inicio; i < fin; i++) {
       const item = datosActuales[i];
-      tablaBody.innerHTML += `<tr><td>${item.periodo}</td><td>${formatoMoneda(item.valor)}</td></tr>`;
+      tablaBody.innerHTML += `<tr><td>${item.periodo}</td><td>${item.fechaTexto}</td><td>${formatoMoneda(item.valor)}</td></tr>`;
     }
     
     // Actualizar información de paginación
