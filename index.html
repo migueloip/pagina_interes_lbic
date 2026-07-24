@@ -791,8 +791,8 @@
 
     <article class="version-summary" aria-live="polite">
       <div class="version-summary-heading">
-        <h3 id="versionTitle">v6 — Cálculo basado en calendario</h3>
-        <span id="versionState" class="version-state">Versión final actual</span>
+        <h3 id="versionTitle">v6 — Calendario y tasas explícitas</h3>
+        <span id="versionState" class="version-state">Versión final actual · julio de 2026</span>
       </div>
       <div class="version-detail">
         <strong>Fórmula usada</strong>
@@ -803,11 +803,11 @@ M_d = (M_d₋₁ + A_d) × (1 + t_d)</div>
       </div>
       <div class="version-detail">
         <strong>Qué fallaba antes o qué limita esta versión</strong>
-        <p id="versionProblem">La primera implementación de v6 asumía una tasa efectiva anual sin explicar que era distinta de una tasa nominal anual dividida en 12.</p>
+        <p id="versionProblem">v5 duplicaba el primer aporte diario y aproximaba los meses. La primera implementación de v6 corrigió eso, pero no explicaba si la tasa anual era nominal o efectiva.</p>
       </div>
       <div class="version-detail">
         <strong>Qué cambió</strong>
-        <p id="versionChange">Se agregó un selector de tipo de tasa y una columna con el interés ganado en cada período.</p>
+        <p id="versionChange">Se incorporaron fechas reales, se eliminó el aporte duplicado y se agregó un selector entre tasa nominal mensual y efectiva anual, además de mostrar el interés ganado por período.</p>
       </div>
       <div class="version-detail">
         <strong>Resultado</strong>
@@ -1183,8 +1183,8 @@ datosActuales.push({
       resultado: 'Fue la primera página estática final presentada, pero todavía calculaba meses aproximados y duplicaba el primer aporte diario.'
     },
     v6: {
-      titulo: 'v6 — Cálculo basado en calendario',
-      estado: 'Versión final actual',
+      titulo: 'v6 — Calendario y tasas explícitas',
+      estado: 'Versión final actual · julio de 2026',
       formula: 'i_m = T_nominal / (12 × 100)\nt_d,m = (1 + i_m)^(1 / N_m) − 1\nAlternativa efectiva: t_d = (1 + T_efectiva / 100)^(1 / D_y) − 1\nM_d = (M_d₋₁ + A_d) × (1 + t_d); M_0 = C',
       latex: String.raw`\begin{aligned}
         i_m &= \dfrac{T_{\mathrm{nominal}}}{12 \cdot 100}\\
@@ -1271,9 +1271,9 @@ for (let dia = 1; dia <= totalDias; dia++) {
           mensaje: 'El interés generado se guarda por separado para mostrarlo en cada período.'
         }
       ],
-      problema: 'La primera implementación de v6 asumía que el porcentaje era una tasa efectiva anual. La interfaz no explicaba esa convención, aunque muchos usuarios esperan una tasa nominal anual dividida en 12.',
-      cambio: 'Se agregó un selector de tipo de tasa. La nominal anual con capitalización mensual quedó predeterminada, la efectiva anual sigue disponible y la tabla ahora muestra el interés ganado en cada período.',
-      resultado: 'Con $100.000.000, 5% nominal anual y sin aportes, el primer mes gana $416.667; los meses siguientes ganan más por el interés compuesto.'
+      problema: 'v5 duplicaba el primer aporte diario y aproximaba cada mes como 30,4167 días. La primera implementación de v6 corrigió esos problemas, pero asumía una tasa efectiva anual sin explicar que era distinta de una nominal anual dividida en 12.',
+      cambio: 'Se incorporaron fechas reales, se eliminó el aporte duplicado y se agregó un selector de tipo de tasa. La nominal anual con capitalización mensual quedó predeterminada, la efectiva anual sigue disponible y la tabla muestra el interés ganado en cada período.',
+      resultado: 'Con $100.000.000, 5% nominal anual y sin aportes, el primer mes gana $416.667 y el año termina en $105.116.190. Con 5% efectivo anual, termina exactamente en $105.000.000.'
     }
   };
 
@@ -1476,8 +1476,8 @@ for (let dia = 1; dia <= totalDias; dia++) {
       { esFinal: true, sinIconos: true, periodoCero: true }
     ),
     v6: () => crearVistaEstatica(
-      'v6-calendario',
-      'La fecha de inicio programa aportes reales y el tipo de tasa aclara si el 5% es nominal o efectivo.',
+      'v6-calendario-tasas',
+      'Estado actual: fechas reales, aportes sin duplicación, tasa nominal o efectiva e interés visible por período.',
       { esFinal: true, sinIconos: true, periodoCero: true, conFechaInicio: true, conTipoTasa: true }
     )
   };
