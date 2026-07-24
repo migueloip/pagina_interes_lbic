@@ -127,6 +127,24 @@
       margin: 2px 0 0;
       color: #465563;
     }
+    .version-detail .version-formula {
+      overflow-x: auto;
+      padding: 9px 11px;
+      border: 1px solid #d7e2ec;
+      border-radius: 5px;
+      background: #edf4fa;
+      color: #173f63;
+      font-family: Consolas, 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .formula-legend {
+      display: block;
+      margin-top: 5px;
+      color: #6b7c8c;
+      font-size: 12px;
+    }
     .version-design {
       margin-top: 20px;
       padding-top: 20px;
@@ -626,8 +644,14 @@
         <span id="versionState" class="version-state">Versión final actual</span>
       </div>
       <div class="version-detail">
-        <strong>Qué faltaba o fallaba</strong>
-        <p id="versionProblem">El gráfico y la tabla comenzaban en el primer día, por lo que no mostraban el capital antes de generar intereses. La lógica diaria heredada todavía agrega un aporte inicial adicional.</p>
+        <strong>Fórmula usada</strong>
+        <p id="versionFormula" class="version-formula">t_d = (1 + T_anual / 100)^(1 / 365) − 1
+M_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)</p>
+        <small class="formula-legend">T = tasa ingresada · t = tasa convertida · M/B = saldo · d = día · m = mes</small>
+      </div>
+      <div class="version-detail">
+        <strong>Por qué fallaba o qué limitaba</strong>
+        <p id="versionProblem">La fórmula heredó el aporte diario adicional de v4 y aproxima todos los meses como intervalos fijos, en vez de usar fechas de calendario.</p>
       </div>
       <div class="version-detail">
         <strong>Qué cambió</strong>
@@ -761,35 +785,40 @@
     v1: {
       titulo: 'v1 — Primera versión en React',
       estado: 'Inicio · abril de 2025',
-      problema: 'La calculadora dependía de React, TypeScript y Vite, por lo que necesitaba instalar dependencias y compilarse antes de publicarla. Además, quedó una importación de useEffect sin utilizar.',
+      formula: 't_m = tasa / 100; anual: t_m ÷ 12; trimestral: t_m ÷ 3; diario: t_m × 30\nB_m = B_m₋₁ + (B_m₋₁ × t_m) + aporte',
+      problema: 'Las tasas se convertían de forma lineal: una tasa diaria se multiplicaba por 30 y una anual se dividía por 12, sin conservar la equivalencia del interés compuesto. Además, el aporte se agregaba después del interés, por lo que no rendía durante ese mes.',
       cambio: 'Se creó la calculadora de interés compuesto con aportes periódicos, resumen, tabla, gráfico y logos; luego se eliminó la importación innecesaria.',
       resultado: 'Una primera aplicación funcional y modular, pero con una estructura más compleja de desplegar y mantener para una página pequeña.'
     },
     v2: {
       titulo: 'v2 — Conversión a una página estática',
       estado: 'Reestructuración · mayo de 2025',
-      problema: 'El proyecto anterior requería compilación. En esta nueva lógica, el interés se aplicaba antes del aporte y la frecuencia mensual usaba el operador módulo con 30,4167 días, por lo que podía omitir aportes.',
+      formula: 't_d = (1 + T_anual / 100)^(1 / 365) − 1\nM_d = M_d₋₁ × (1 + t_d) + aporte si d % frecuencia = 0',
+      problema: 'La tasa diaria efectiva estaba mejor calculada, pero el interés se aplicaba antes del aporte. Además, comprobar d % 30,4167 = 0 con días enteros casi nunca se cumplía, por lo que los aportes mensuales podían omitirse.',
       cambio: 'React y Vite se reemplazaron por un solo index.html con CSS y JavaScript. Se incorporaron Chart.js, moneda CLP, vistas por período, tabla y paginación.',
       resultado: 'La aplicación quedó lista para abrirse o publicarse directamente, aunque el orden del cálculo y algunos aportes periódicos todavía necesitaban ajustes.'
     },
     v3: {
       titulo: 'v3 — Corrección del orden de cálculo',
       estado: 'Ajuste de fórmula · mayo de 2025',
-      problema: 'Los aportes se sumaban después de calcular el interés diario, de modo que no comenzaban a generar interés el mismo día.',
+      formula: 't_d = (1 + T_anual / 100)^(1 / 365) − 1\nM_d = (M_d₋₁ + aporte si d % frecuencia = 0) × (1 + t_d)',
+      problema: 'Se corrigió el orden para que el aporte generara interés el mismo día, pero continuó la condición d % 30,4167 = 0. Por eso la frecuencia mensual todavía podía no ejecutar sus aportes.',
       cambio: 'El aporte periódico pasó a sumarse antes de aplicar la tasa diaria.',
       resultado: 'El orden financiero quedó más coherente, pero la frecuencia mensual todavía podía fallar por depender de una comparación con días decimales.'
     },
     v4: {
       titulo: 'v4 — Control de frecuencia de aportes',
       estado: 'Corrección de periodicidad · mayo de 2025',
-      problema: 'El cálculo con módulo no era confiable para períodos mensuales de 30,4167 días.',
+      formula: 'contador = contador + 1; si contador ≥ frecuencia: M = M + aporte y contador = 0\nM_d = M × (1 + t_d); para frecuencia diaria: M_0 = capital + aporte',
+      problema: 'El contador solucionó la comparación con decimales, pero la frecuencia diaria agregó un aporte antes del ciclo y volvió a agregar otro en el día 1. Además, un mes quedó aproximado como un intervalo de 30,4167 días.',
       cambio: 'Se agregó un contador de días desde el último aporte y se reinicia cada vez que corresponde aportar. También se incorporó un aporte inicial especial para la frecuencia diaria.',
       resultado: 'Los aportes semanales, mensuales y anuales se controlan de forma más estable. Como efecto pendiente, la opción diaria suma un aporte inicial y otro en el día 1.'
     },
     v5: {
       titulo: 'v5 — Presentación del punto de partida',
       estado: 'Versión final actual',
-      problema: 'El gráfico y la tabla comenzaban en el primer día, por lo que no mostraban el capital antes de generar intereses. La lógica diaria heredada todavía agrega un aporte inicial adicional.',
+      formula: 't_d = (1 + T_anual / 100)^(1 / 365) − 1\nM_d = (M_d₋₁ + aporte si corresponde) × (1 + t_d)',
+      problema: 'El cálculo no cambió respecto de v4: conserva el aporte diario adicional y usa intervalos promedio en vez de fechas reales. El período 0 mejora la visualización, pero no corrige esas limitaciones internas.',
       cambio: 'Se añadió el período 0 con el monto inicial. Después se simplificaron las pestañas, se cambiaron los botones a azul y se agregó el favicon.',
       resultado: 'Es la página estática actual: calcula en CLP y presenta los resultados por día, semana, mes o año mediante gráfico y tabla.'
     }
@@ -965,6 +994,7 @@
 
     document.getElementById('versionTitle').textContent = version.titulo;
     document.getElementById('versionState').textContent = version.estado;
+    document.getElementById('versionFormula').textContent = version.formula;
     document.getElementById('versionProblem').textContent = version.problema;
     document.getElementById('versionChange').textContent = version.cambio;
     document.getElementById('versionResult').textContent = version.resultado;
